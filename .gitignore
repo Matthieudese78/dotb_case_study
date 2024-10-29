@@ -1,0 +1,16 @@
+# Ignore everything
+*.*
+**/venv
+**/build
+./__init__.py
+**/__init__.py
+# /**/*
+
+# Allow Python and Markdown files
+!*.py
+!*.md
+!*.yaml
+!requirements.txt
+
+# Also allow .gitignore file
+!.gitignore
