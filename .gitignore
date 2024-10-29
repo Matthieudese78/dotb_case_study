@@ -1,6 +1,6 @@
 # Ignore everything
 *.*
-**/venv
+**/myenv
 **/build
 ./__init__.py
 **/__init__.py
