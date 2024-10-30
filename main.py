@@ -1,4 +1,4 @@
-#!/home/matthieu/Documents/dotblocks/dotb_case_study/myenv/python3
+#!/usr/bin/python3
 # %% Loading packages :
 # Standard packages :
 from __future__ import annotations
