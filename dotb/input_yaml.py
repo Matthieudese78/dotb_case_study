@@ -5,10 +5,9 @@ import argparse
 import os
 
 import yaml
-# find
 
 
-def get_config_file(default_config_path):
+def get_config_file(default_config_path, default_input):
     """
     Parses the argument for a .yaml input file
 
@@ -19,15 +18,14 @@ def get_config_file(default_config_path):
     - if not : uses ballistic_default_input.yaml file as input
     """
     # Define the default config file path
-    # default_config_path = os.path.join(os.path.dirname(__file__), 'default_config.yaml')
-    default_config_path = (
-        f'{default_config_path}/ballistic_default_input.yaml'
-    )
+    default_config_path = f'{default_config_path}/{default_input}'
 
     # Create an ArgumentParser instance
     parser = argparse.ArgumentParser(description='Your script description')
     parser.add_argument(
-        'config', nargs='?', default=default_config_path,
+        'config',
+        nargs='?',
+        default=default_config_path,
         help='Path to the config file (optional)',
     )
 
@@ -45,6 +43,8 @@ def get_config_file(default_config_path):
         config_path = default_config_path
 
     return config_path
+
+
 # turns the entries of a config.yaml file into a dict :
 
 

@@ -16,10 +16,13 @@ import dotb.input_yaml as input
 # %% main function definition :
 def main():
     print('This is the main program')
-    # main directory :
+    # main directory : contains the default .yaml input files
     maindir = os.path.dirname(__file__)
-    config_file_path = input.get_config_file(maindir)
+    # default .yaml file name :
+    default_input = 'ballistic_default_input.yaml'
+    config_file_path = input.get_config_file(maindir, default_input)
     print(f'Using config file: {config_file_path}')
+    # Parsing the input.yaml --> config dict
     config = input.load_config(config_file_path)
     print(f"Solving the {config['case']} case")
     print(f"using the {config['solver']} solver")
