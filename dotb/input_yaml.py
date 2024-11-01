@@ -4,7 +4,7 @@ from __future__ import annotations
 import argparse
 import os
 
-# import yaml
+import yaml
 # find
 
 
@@ -36,3 +36,9 @@ def get_config_file(default_config_path):
         config_path = default_config_path
 
     return config_path
+# turns the entries of a config.yaml file into a dict :
+
+
+def load_config(file_path):
+    with open(file_path) as config_file:
+        return yaml.safe_load(config_file)
