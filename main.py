@@ -7,6 +7,7 @@ import os.path
 
 import numpy as np
 
+import dotb.initialization as init
 import dotb.input_yaml as input
 # import dotb.postt as postt
 # import dotb.solver as solver
@@ -17,18 +18,27 @@ import dotb.input_yaml as input
 # %% main function definition :
 def main():
     print('This is the main program')
+    # Default input :
     # main directory : contains the default .yaml input files
     maindir = os.path.dirname(__file__)
     # default .yaml file name :
     default_input = 'ballistic_default_input.yaml'
+    # Reading argument :
+    # arg parsing for inputs :
     config_file_path = input.get_config_file(maindir, default_input)
     print(f'Using config file: {config_file_path}')
-    # Parsing the input.yaml --> config dict
+    # input.yaml --> config dict
     config = input.load_config(config_file_path)
     print(f"Solving the {config['case']} case")
     print(f"using the {config['solver']} solver")
     # time vector :
     t = np.linspace(0, config['tend'], config['nt'])
+    print(f'Calculus duration {len(t)}')
+    # y-Initialization :
+    # tensor field y(t=0) from config :
+    y_0 = init.intiate_y(**config)
+    print(f'y0 = {y_0}')
+    # Computation :
 
     # Example usage
     # def example_F(x, y, dydx):
