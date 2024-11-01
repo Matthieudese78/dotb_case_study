@@ -24,6 +24,7 @@ g: 9.81
 # Air density (kg.m^-3) :
 rho: 1.225
 # Radius of the spherical ball (m) :
-R: 0.025
+    # for a sphere of 2.5 cm radius (R = 0.025 m) :
+A:  0.0019635
 # Drag coefficient :
 c: 0.47
