@@ -3,10 +3,12 @@
 # Standard packages :
 from __future__ import annotations
 
-import numpy as np
+import os.path
 
-import dotb.postt as postt
-import dotb.solver as solver
+import dotb.input_yaml as input
+# import numpy as np
+# import dotb.postt as postt
+# import dotb.solver as solver
 
 # Local packages :
 
@@ -14,6 +16,13 @@ import dotb.solver as solver
 # %% main function definition :
 def main():
     print('This is the main program')
+    # main directory :
+    maindir = os.path.dirname(__file__)
+    config_file_path = input.get_config_file(maindir)
+    print(f'Using config file: {config_file_path}')
+    config = input.load_config(config_file_path)
+    print(f"Solving the {config['case']} case")
+    print(f"using the {config['solver']} solver")
 
     # Example usage
     # def example_F(x, y, dydx):
