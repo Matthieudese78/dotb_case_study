@@ -1,0 +1,14 @@
+# Saving results directory :
+repsave: "/home/matthieu/Documents/dotblocks/dotb_case_study/ballistic/"
+# Initial x-coordinate :
+x0: 0.
+# Initial y-coordinate :
+y0: 0.
+# Initial velocity magnitude :
+v0: 20.
+# Initial angle / (Ox) :
+theta0: 45.
+# Calculus duration :
+tend: 30.
+# Time step number :
+nt: 100
