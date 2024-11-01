@@ -9,6 +9,15 @@ import yaml
 
 
 def get_config_file(default_config_path):
+    """
+    Parses the argument for a .yaml input file
+
+    Parameters : default_config_path
+    For now = the root directory
+    - appends the root dir name to the argument
+    - if the .yaml exists, returns the input.file path
+    - if not : uses ballistic_default_input.yaml file as input
+    """
     # Define the default config file path
     # default_config_path = os.path.join(os.path.dirname(__file__), 'default_config.yaml')
     default_config_path = (
@@ -40,5 +49,8 @@ def get_config_file(default_config_path):
 
 
 def load_config(file_path):
+    """
+    Turns the entries of a config.yaml file into a dict.
+    """
     with open(file_path) as config_file:
         return yaml.safe_load(config_file)
