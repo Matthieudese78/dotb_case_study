@@ -3,6 +3,12 @@ from __future__ import annotations
 
 import numpy as np
 
+# Generic 2nd member treatment :
+
+
+def F(y, **kw):
+    if kw['case'] == 'ballistic':
+        return ballistic(y, kw['rho'], kw['c'], kw['A'], kw['g'])
 # Ballistic :
 
 
