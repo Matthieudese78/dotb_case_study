@@ -5,8 +5,9 @@ from __future__ import annotations
 
 import os.path
 
+import numpy as np
+
 import dotb.input_yaml as input
-# import numpy as np
 # import dotb.postt as postt
 # import dotb.solver as solver
 
@@ -26,6 +27,8 @@ def main():
     config = input.load_config(config_file_path)
     print(f"Solving the {config['case']} case")
     print(f"using the {config['solver']} solver")
+    # time vector :
+    t = np.linspace(0, config['tend'], config['nt'])
 
     # Example usage
     # def example_F(x, y, dydx):
