@@ -6,7 +6,7 @@ import numpy as np
 # Generic 2nd member treatment :
 
 
-def intiate_y(**kw):
+def intiate_y(t, **kw):
     """
     Initiate the tensor field y(t=0)
     from input.yaml file keywords arguments.
@@ -28,5 +28,12 @@ def intiate_y(**kw):
         y0 = kw['y_0']
         dxdt0 = kw['v_0']*np.cos(kw['theta_0'])
         dydt0 = kw['v_0']*np.cos(kw['theta_0'])
+        y_0 = np.array([x0, y0, dxdt0, dydt0])
 
-    return np.array([x0, y0, dxdt0, dydt0])
+    # y - initialization : adding a dimension for time
+    n_steps = len(t)
+    y_shape_with_time = y0.shape + (n_steps,)
+    y = np.zeros(y_shape_with_time, dtype=y0.dtype)
+    y[..., 0] = y0
+
+    return y, y_0

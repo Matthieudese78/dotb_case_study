@@ -33,11 +33,17 @@ def main():
     print(f"using the {config['solver']} solver")
     # time vector :
     t = np.linspace(0, config['tend'], config['nt'])
-    print(f'Calculus duration {len(t)}')
-    # y-Initialization :
-    # tensor field y(t=0) from config :
-    y_0 = init.intiate_y(**config)
+    #   time step :
+    # dt = t[1] - t[0]
+
+    # y-initialization :
+    #   n-dimensional tensor field y(t=0) from config :
+    y, y_0 = init.intiate_y(t, **config)
     print(f'y0 = {y_0}')
+    print(f'len(y) = {len(y)}')
+
+    # F : right hand side computation function :
+
     # Computation :
 
     # Example usage
