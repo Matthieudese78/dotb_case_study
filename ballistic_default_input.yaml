@@ -1,14 +1,29 @@
+# Name of the study case = keyword for the second member "F" computation, choose between :
+# - ballistic
+# - rabbit
+# - diffusion
+case: "ballistic"
+# Solver :
+solver: "euler_explicit"
 # Saving results directory :
-repsave: "/home/matthieu/Documents/dotblocks/dotb_case_study/ballistic/"
-# Initial x-coordinate :
-x0: 0.
-# Initial y-coordinate :
-y0: 0.
-# Initial velocity magnitude :
-v0: 20.
-# Initial angle / (Ox) :
-theta0: 45.
+save_dir: "/home/matthieu/Documents/dotblocks/dotb_case_study/ballistic/"
 # Calculus duration :
-tend: 30.
+t_end: 30.
 # Time step number :
 nt: 100
+# Initial x-coordinate :
+x_0: 0.
+# Initial y-coordinate :
+y_0: 0.
+# Initial velocity magnitude :
+v_0: 20.
+# Initial angle / (Ox) :
+theta_0: 45.
+# Gravitational constant (m.s^-2) :
+g: 9.81
+# Air density (kg.m^-3) :
+rho: 1.225
+# Radius of the spherical ball (m) :
+R: 0.025
+# Drag coefficient :
+c: 0.47
