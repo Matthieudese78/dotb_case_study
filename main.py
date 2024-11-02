@@ -9,7 +9,8 @@ import numpy as np
 
 import dotb.initiate as init
 import dotb.input_yaml as input
-# import dotb.postt as postt
+import dotb.postt as postt
+import dotb.solver as solver
 # import dotb.solver as solver
 
 # Local packages :
@@ -32,22 +33,25 @@ def main():
     print(f"Solving the {config['case']} case")
     print(f"using the {config['solver']} solver")
     # time vector :
-    t = np.linspace(0, config['t_end'], config['nt'])
+    t = np.linspace(0, config['t_end'], config['n_t'])
 
     # y-initialization :
     #   n-dimensional tensor field y(t=0) from config :
-    y, y_0 = init.intiate_y(t, **config)
-    print(f'type y_0 = {type(y_0)}')
-    print(f'type y = {type(y)}')
-    print(f'outupt type {type(init.intiate_y(t, **config))}')
-    print(f'outupt[0] type {type(init.intiate_y(t, **config)[0])}')
-    print(f'outupt[1] type {type(init.intiate_y(t, **config)[1])}')
-    print(f'outupt[0] type {type(init.intiate_y(t, **config)[0].dtype)}')
-    print(f'outupt[1] type {type(init.intiate_y(t, **config)[1].dtype)}')
+    y = init.intiate_y(**config)
+    print(f'Initial solution = {y}')
+    print(f'type y_0 = {type(y)}')
+    print(f'outupt type {type(init.intiate_y(**config))}')
 
-    # F : right hand side computation function :
+    # Solver :
+    sol = solver.euler_explicit(y, t, **config)
+    print(f'final solution = {sol[-1]}')
+    print(f'Number of saved time steps = {np.shape(sol)[0]}')
+    print(f'sol.shape = {sol.shape}')
+    print(f'sol = {sol}')
 
-    # Computation :
+    # Post-treatment :
+    t_save = t[::config['n_save']]
+    postt.postt_ballistic_2(t_save, sol, **config)
 
     # Example usage
     # def example_F(x, y, dydx):
