@@ -2,11 +2,12 @@
 from __future__ import annotations
 
 import numpy as np
-
+from input_yaml import mydict_ballistic
 # Generic 2nd member treatment :
+# import numpy.typing as npt
 
 
-def intiate_y(t, **kw):
+def intiate_y(t, **kw: mydict_ballistic) -> tuple:
     """
     Initiate the tensor field y(t=0)
     from input.yaml file keywords arguments.
