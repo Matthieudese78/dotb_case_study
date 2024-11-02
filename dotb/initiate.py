@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 import numpy as np
-from input_yaml import mydict_ballistic
+
+from dotb.input_yaml import mydict_ballistic
 # Generic 2nd member treatment :
 # import numpy.typing as npt
 
