@@ -4,8 +4,8 @@ from __future__ import annotations
 import os
 import sys
 
-from setuptools import find_packages
-from setuptools import setup
+from setuptools import find_packages  # type: ignore
+from setuptools import setup  # type: ignore
 
 # Test if execution in the local virtual environment :
 if 'VIRTUAL_ENV' in os.environ:
