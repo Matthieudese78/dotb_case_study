@@ -3,9 +3,11 @@ from __future__ import annotations
 
 import numpy as np
 
+import dotb.second_member as second
+
 
 # %%
-def euler_explicit(F, y0, x, t, dx=0.01, dt=0.001):
+def euler_explicit(y, F, t, **kw):
     """
     Solve ∂y/∂t = F(x,y,y') using Euler explicit method
 
@@ -20,21 +22,14 @@ def euler_explicit(F, y0, x, t, dx=0.01, dt=0.001):
     Returns:
     y (ndarray): Solution tensor field
     """
-    n_steps = len(t)
-    n_points = len(x)
-
-    y = np.zeros((n_steps, n_points))
-    y[0] = y0
-
-    for i in range(n_steps - 1):
-        # dydx = np.gradient(y[i], axis=1) / dx
-        dydx = np.gradient(y[i]) / dx
-
+    dt = t[1] - t[0]
+    sol = []
+    for i, ti in enumerate(t):
         # Apply Euler explicit formula
-        # y[i + 1] = y[i] + dt * F(x[:, np.newaxis], y[i], dydx)
-        y[i + 1] = y[i] + dt * F(x, y[i], dydx)
-
-    return y
+        y_new = y + dt * second.F(y, **kw)
+        if ti % kw['nsave']:
+            sol.append(y_new)
+    return sol
 
 
 def euler_explicit_ballistic(F, y0, c, A, g, t):
