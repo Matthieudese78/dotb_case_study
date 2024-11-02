@@ -27,8 +27,8 @@ def intiate_y(**kw: mydict_ballistic) -> tuple:
         # Reading args :
         x0 = kw['x_0']
         y0 = kw['y_0']
-        dxdt0 = kw['v_0']*np.cos(kw['theta_0'])
-        dydt0 = kw['v_0']*np.cos(kw['theta_0'])
+        dxdt0 = kw['v_0']*np.cos(np.pi*kw['theta_0']/180.)
+        dydt0 = kw['v_0']*np.cos(np.pi*kw['theta_0']/180.)
         y_0 = np.array([x0, y0, dxdt0, dydt0])
 
     return y_0
