@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -16,6 +18,27 @@ def postt_1D(t, x, sol):
     plt.legend()
     plt.show()
     plt.close('all')
+
+
+def postt_ballistic_2(t: np.ndarray, sol: np.ndarray, **kw):
+    print(f"{kw['save_dir']}")
+    if not os.path.exists(kw['save_dir']):
+        os.makedirs(kw['save_dir'])
+    labs = [
+        r'$x(t)$'+' (m)', r'$y(t)$'+' (m)',
+        r'$\frac{dx}{dt}$'+' (m.'+r'$s^{-1}$' +
+        ')', r'$\frac{dy}{dt}$'+' (m.'+r'$s^{-1}$'+')',
+    ]
+    fig_names = ['x', 'y', 'vx', 'vy']
+    for i in range(np.shape(sol)[1]):
+        # plt.plot(t, sol[:,i], label=f'slice={i}')
+        plt.plot(t, sol[:, i])
+        plt.xlabel('t (s)')
+        plt.ylabel(labs[i])
+        plt.title(f'Solution {i}^th y component over time \n')
+        # plt.legend()
+        plt.savefig(kw['save_dir']+fig_names[i]+'.png')
+        plt.close('all')
 
 
 def postt_ballistic(t, sol):
