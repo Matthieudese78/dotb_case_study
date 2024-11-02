@@ -7,7 +7,7 @@ import dotb.second_member as second
 
 
 # %%
-def euler_explicit(y, F, t, **kw):
+def euler_explicit(y: np.ndarray, t: np.ndarray, **kw) -> np.ndarray:
     """
     Solve ∂y/∂t = F(x,y,y') using Euler explicit method
 
@@ -23,13 +23,18 @@ def euler_explicit(y, F, t, **kw):
     y (ndarray): Solution tensor field
     """
     dt = t[1] - t[0]
+    print(f'solver : dt = {dt}')
     sol = []
-    for i, ti in enumerate(t):
+    sol.append(y)
+    for i, ti in enumerate(t[:-1]):
         # Apply Euler explicit formula
         y_new = y + dt * second.F(y, **kw)
-        if ti % kw['nsave']:
+        if ((i+1) % kw['n_save'] == 0):
+            print(f'saving {i}^th time step')
             sol.append(y_new)
-    return sol
+            print(f'solver : sol = {sol}')
+        y = y_new
+    return np.array(sol)
 
 
 def euler_explicit_ballistic(F, y0, c, A, g, t):
