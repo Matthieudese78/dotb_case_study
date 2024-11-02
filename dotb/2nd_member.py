@@ -9,15 +9,12 @@ import numpy as np
 def F(y, **kw):
     if kw['case'] == 'ballistic':
         return ballistic(y, kw['rho'], kw['c'], kw['A'], kw['g'])
-# Ballistic :
 
 
-def ballistic(y, rho, c, A, g):
+def ballistic(y, rho: float, c: float, A: float, g: float):
     """
     Ballistic function for F(x,y,dydx')
 
-    Parameters:
-    x (array): Spatial coordinates
     y (array): Current state of y
     dxdt (array): Time derivative of x
     dydt (array): Time derivative of y
