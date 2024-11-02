@@ -123,10 +123,12 @@ def boundary_conditions_2D(x, y, data, **kw):
             ly = y[-1] - y[0]
             alpha = kw['interpolation_coeff']
 
-            ix_sup = np.where(x >= lx * (1.0 - alpha))
-            ix_mid = np.where((x > lx * alpha) & (x < lx * (1.0 - alpha)))
-            iy_sup = np.where(y >= ly * (1.0 - alpha))
-            iy_mid = np.where((y > ly * alpha) & (y < ly * (1.0 - alpha)))
+            ix_sup = np.where(x >= x[0] + lx * (1.0 - alpha))
+            ix_mid = np.where((x > x[0] + lx * alpha)
+                              & (x < x[0] + lx * (1.0 - alpha)))
+            iy_sup = np.where(y >= y[0] + ly * (1.0 - alpha))
+            iy_mid = np.where((y > y[0] + ly * alpha)
+                              & (y < y[0] + ly * (1.0 - alpha)))
 
             vlim_x = lx * alpha
             vlim_y = ly * alpha
@@ -302,8 +304,10 @@ nx = 100
 ny = 100
 lx = 1.0
 ly = 1.0
-x = np.linspace(0.0, lx, nx)
-y = np.linspace(0.0, ly, ny)
+# x = np.linspace(0.0, lx, nx)
+# y = np.linspace(0.0, ly, ny)
+x = np.linspace(-lx/2., lx/2., nx)
+y = np.linspace(-lx/2., ly/2., ny)
 # mesh = np.array([(xi,yj) for ])
 dx = x[1] - x[0]
 dy = y[1] - y[0]
@@ -346,7 +350,7 @@ kw_neumann = {
     'top_boundary': 0.0,
 }
 
-kw = kw_neumann
+kw = kw_dirichlet
 
 boundaries = boundary_conditions_2D(x, y, y0, **kw)
 
@@ -430,10 +434,11 @@ SL_y0 = scalar_laplacian(y0, discr, edge_order)
 postt_2Dmap(x, y, SL_y0, 'Scalar Laplacian \n', 'X', 'Y', 'Scalar Laplacian')
 
 # %% diffusion coefficient map :
-D0 = 0.1
-D = D0 * np.ones((nx, ny))
-# D = D0 * np.array([[1. + (xi / lx) for xi in x] for yi in y])
+D0 = 0.01
+# D = D0 * np.ones((nx, ny))
+D = D0 * np.array([[1. + (xi / lx) for xi in x] for yi in y])
 # D = D0 * np.array([[1.0 + (xi / lx) * (yi / ly) for xi in x] for yi in y])
+# D = (D0/T0) * y0
 
 print(type(D))
 print(type(y0))
@@ -441,6 +446,8 @@ print(np.shape(D))
 print(np.shape(y0))
 print(type(D * y0))
 print(np.shape(D * y0))
+
+print(f'diffusion max value = {np.max(D)}')
 # %%
 F = scalar_laplacian(D * y0, discr, edge_order)
 print(type(F))
@@ -464,6 +471,7 @@ postt_2Dmap(x, y, div, 'Divergence \n', 'X', 'Y', 'Divergence')
 # %% solver :
 n_steps = len(t)
 dt = t[1] - t[0]
+print(f'dt = {dt}')
 
 # %% initialization :
 y_shape_with_time = y0.shape + (n_steps,)
