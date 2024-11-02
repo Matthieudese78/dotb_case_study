@@ -3,11 +3,28 @@ from __future__ import annotations
 
 import argparse
 import os
+from typing import TypedDict
 
 import yaml
 
 
-def get_config_file(default_config_path, default_input):
+class mydict_ballistic(TypedDict):
+    case: str
+    solver: str
+    save_dir: str
+    t_end: float
+    nt: int
+    x_0: float
+    y_0: float
+    v_0: float
+    theta_0: float
+    g: float
+    rho: float
+    A: float
+    c: float
+
+
+def get_config_file(default_config_path, default_input) -> str:
     """
     Parses the argument for a .yaml input file
 
@@ -48,7 +65,7 @@ def get_config_file(default_config_path, default_input):
 # turns the entries of a config.yaml file into a dict :
 
 
-def load_config(file_path):
+def load_config(file_path) -> mydict_ballistic:
     """
     Turns the entries of a config.yaml file into a dict.
     """
