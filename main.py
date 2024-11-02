@@ -23,7 +23,8 @@ def main():
     # main directory : contains the default .yaml input files
     maindir = os.path.dirname(__file__)
     # default .yaml file name :
-    default_input = 'ballistic_default_input.yaml'
+    # default_input = 'ballistic_default_input.yaml'
+    default_input = 'rabbit_default_input.yaml'
     # Reading argument :
     # arg parsing for inputs :
     config_file_path = input.get_config_file(maindir, default_input)

@@ -1,0 +1,23 @@
+# Name of the study case = keyword for the second member "F" computation, choose between :
+# - ballistic
+# - rabbit
+# - diffusion
+case: "rabbit"
+# Solver :
+solver: "euler_explicit"
+# Saving results directory :
+save_dir: "/home/matthieu/Documents/dotblocks/dotb_case_study/results/rabbit/"
+# Calculus duration in years :
+t_end: 1.
+# Time step number : 1 year
+n_t: 1000
+# save every ... :
+n_save: 10
+# Initial population :
+N_0: 2.
+# Reproduction rate :
+# - 5 litters annualy of 5 kits each
+k: 25.
+# Carrying capacity : Max population on a given area
+# (due to environment constraints)
+b: 500.

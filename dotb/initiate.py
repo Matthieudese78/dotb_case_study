@@ -7,7 +7,7 @@ from dotb.input_yaml import mydict_ballistic
 # import numpy.typing as npt
 
 
-def intiate_y(**kw: mydict_ballistic) -> tuple:
+def intiate_y(**kw: mydict_ballistic) -> np.ndarray:
     """
     Initiate the tensor field y(t=0)
     from input.yaml file keywords arguments.
@@ -30,5 +30,9 @@ def intiate_y(**kw: mydict_ballistic) -> tuple:
         dxdt0 = kw['v_0']*np.cos(np.pi*kw['theta_0']/180.)
         dydt0 = kw['v_0']*np.cos(np.pi*kw['theta_0']/180.)
         y_0 = np.array([x0, y0, dxdt0, dydt0])
+
+    if kw['case'] == 'rabbit':
+        # Reading args :
+        y_0 = np.array([kw['N_0']])
 
     return y_0

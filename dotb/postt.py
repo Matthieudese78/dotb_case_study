@@ -20,6 +20,30 @@ def postt_1D(t, x, sol):
     plt.close('all')
 
 
+def plot_postt(t, sol, **kw):
+    if kw['case'] == 'ballistic':
+        return postt_ballistic_2(t, sol, **kw)
+    if kw['case'] == 'rabbit':
+        return postt_rabbit(t, sol, **kw)
+
+
+def postt_rabbit(t: np.ndarray, sol: np.ndarray, **kw):
+    print(f"{kw['save_dir']}")
+    if not os.path.exists(kw['save_dir']):
+        os.makedirs(kw['save_dir'])
+    labs = [r'$N(t)$'+' (year)']
+    fig_names = ['N_ft']
+    for i in range(np.shape(sol)[1]):
+        # plt.plot(t, sol[:,i], label=f'slice={i}')
+        plt.plot(t, sol[:, i])
+        plt.xlabel('t (s)')
+        plt.ylabel(labs[i])
+        plt.title(f'Solution {i}^th y component over time \n')
+        # plt.legend()
+        plt.savefig(kw['save_dir']+fig_names[i]+'.png')
+        plt.close('all')
+
+
 def postt_ballistic_2(t: np.ndarray, sol: np.ndarray, **kw):
     print(f"{kw['save_dir']}")
     if not os.path.exists(kw['save_dir']):
@@ -42,18 +66,6 @@ def postt_ballistic_2(t: np.ndarray, sol: np.ndarray, **kw):
 
 
 def postt_ballistic(t, sol):
-    for i, slice in enumerate(sol):
-        print(f'i = {i}')
-        plt.plot(t, slice, label=f'slice={i}')
-    plt.xlabel('t')
-    plt.ylabel('y')
-    plt.title('Solution {i}^th y component over time')
-    plt.legend()
-    plt.show()
-    plt.close('all')
-
-
-def postt_rabbit(t, sol):
     for i, slice in enumerate(sol):
         print(f'i = {i}')
         plt.plot(t, slice, label=f'slice={i}')
