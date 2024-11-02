@@ -27,4 +27,4 @@ def ballistic(y, rho: float, c: float, A: float, g: float):
     mu = 0.5*rho*c*A
     # Computes velocity magnitude
     magv = np.sqrt(dxdt**2 + dydt**2)
-    return np.array([dxdt, dydt, -mu*dxdt*magv, -g-mu*dydt*magv])
+    return np.array([dxdt, dydt, -mu*dxdt*magv, - g - mu*dydt*magv])
