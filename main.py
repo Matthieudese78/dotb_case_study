@@ -7,7 +7,7 @@ import os.path
 
 import numpy as np
 
-import dotb.initialization as init
+import dotb.initiate as init
 import dotb.input_yaml as input
 # import dotb.postt as postt
 # import dotb.solver as solver
@@ -32,7 +32,7 @@ def main():
     print(f"Solving the {config['case']} case")
     print(f"using the {config['solver']} solver")
     # time vector :
-    t = np.linspace(0, config['tend'], config['nt'])
+    t = np.linspace(0, config['t_end'], config['nt'])
     #   time step :
     # dt = t[1] - t[0]
 

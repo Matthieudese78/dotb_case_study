@@ -32,8 +32,8 @@ def intiate_y(t, **kw):
 
     # y - initialization : adding a dimension for time
     n_steps = len(t)
-    y_shape_with_time = y0.shape + (n_steps,)
-    y = np.zeros(y_shape_with_time, dtype=y0.dtype)
-    y[..., 0] = y0
+    y_shape_with_time = y_0.shape + (n_steps,)
+    y = np.zeros(y_shape_with_time, dtype=y_0.dtype)
+    y[..., 0] = y_0
 
     return y, y_0
