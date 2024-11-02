@@ -13,7 +13,8 @@ class mydict_ballistic(TypedDict):
     solver: str
     save_dir: str
     t_end: float
-    nt: int
+    n_t: int
+    n_save: int
     x_0: float
     y_0: float
     v_0: float

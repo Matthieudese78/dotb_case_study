@@ -6,11 +6,13 @@ case: "ballistic"
 # Solver :
 solver: "euler_explicit"
 # Saving results directory :
-save_dir: "/home/matthieu/Documents/dotblocks/dotb_case_study/ballistic/"
+save_dir: "/home/matthieu/Documents/dotblocks/dotb_case_study/results/ballistic/"
 # Calculus duration :
 t_end: 30.
 # Time step number :
-nt: 100
+n_t: 100
+# save every ... :
+n_save: 10
 # Initial x-coordinate :
 x_0: 0.
 # Initial y-coordinate :
