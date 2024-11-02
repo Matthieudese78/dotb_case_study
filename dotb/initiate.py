@@ -4,11 +4,10 @@ from __future__ import annotations
 import numpy as np
 
 from dotb.input_yaml import mydict_ballistic
-# Generic 2nd member treatment :
 # import numpy.typing as npt
 
 
-def intiate_y(t, **kw: mydict_ballistic) -> tuple:
+def intiate_y(**kw: mydict_ballistic) -> tuple:
     """
     Initiate the tensor field y(t=0)
     from input.yaml file keywords arguments.
@@ -32,10 +31,4 @@ def intiate_y(t, **kw: mydict_ballistic) -> tuple:
         dydt0 = kw['v_0']*np.cos(kw['theta_0'])
         y_0 = np.array([x0, y0, dxdt0, dydt0])
 
-    # y - initialization : adding a dimension for time
-    n_steps = len(t)
-    y_shape_with_time = y_0.shape + (n_steps,)
-    y = np.zeros(y_shape_with_time, dtype=y_0.dtype)
-    y[..., 0] = y_0
-
-    return y, y_0
+    return y_0
