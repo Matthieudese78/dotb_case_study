@@ -33,14 +33,17 @@ def main():
     print(f"using the {config['solver']} solver")
     # time vector :
     t = np.linspace(0, config['t_end'], config['nt'])
-    #   time step :
-    # dt = t[1] - t[0]
 
     # y-initialization :
     #   n-dimensional tensor field y(t=0) from config :
     y, y_0 = init.intiate_y(t, **config)
-    print(f'y0 = {y_0}')
-    print(f'len(y) = {len(y)}')
+    print(f'type y_0 = {type(y_0)}')
+    print(f'type y = {type(y)}')
+    print(f'outupt type {type(init.intiate_y(t, **config))}')
+    print(f'outupt[0] type {type(init.intiate_y(t, **config)[0])}')
+    print(f'outupt[1] type {type(init.intiate_y(t, **config)[1])}')
+    print(f'outupt[0] type {type(init.intiate_y(t, **config)[0].dtype)}')
+    print(f'outupt[1] type {type(init.intiate_y(t, **config)[1].dtype)}')
 
     # F : right hand side computation function :
 
