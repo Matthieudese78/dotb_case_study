@@ -1,0 +1,74 @@
+# Name of the study case = keyword for the second member "F" computation, choose between :
+# - ballistic
+# - rabbit
+# - diffusion
+case: "diffusion_2D"
+# Solver :
+solver: "euler_explicit"
+# Saving results directory :
+save_dir: "/home/matthieu/Documents/dotblocks/dotb_case_study/results/diffusion_2D/"
+# Calculus duration :
+t_end: 10.
+# Time step number :
+n_t: 10000
+# save every ... :
+n_save: 400
+# x axis domain width :
+l_x: 1.
+# y axis domain width :
+l_y: 1.
+# x axis discretization :
+n_x: 100
+# y axis discretization :
+n_y: 100
+# EMPTY : x & y increments
+# (computed at runtime based on the input data)
+dx: none
+dy: none
+# Temperature "mean" value :
+T_0: 20.
+
+# Temperature initial partition :
+# Product of sinuses function of x & y variables :
+# (Next step : give Fourrier coeffs as input)
+# Remark : p_x = p_y = 0. gives a uniform
+#          temperature partition = T_0
+    # sinus number of periods along the x-axis :
+p_x: 1.
+    # sinus number of periods along the y-axis :
+p_y: 1.
+# Diffusion coefficient "mean" value :
+D_0: 0.01
+    # Uniform diffusion coefficient :
+D_uni: False
+    # Product of linear functions of x and y :
+D_lin: True
+    # D(x,y) : empty diffusion coeff field
+    # (filled in initiate_y)
+D: none
+
+# Boundary conditions :
+    # Dirichlet OR Neumann :
+dirichlet: False
+neumann: True
+    # Interpolation at the corners :
+    #--> (C^1 interpolation of boundary conditions
+    # at the domain corners in order to smoothen boundary conditions)
+interpolation_coeff: 0.
+    # Dirichlet : imposed temperature value
+dirichlet_right_boundary: 10.
+dirichlet_left_boundary: 10.
+dirichlet_bottom_boundary: 4.
+dirichlet_top_boundary: 14.
+    # Neumann : imposed heat flow value (at 1st order)
+neumann_right_boundary: -100.
+neumann_left_boundary: 100.
+neumann_bottom_boundary: 0.
+neumann_top_boundary: 0.
+    # EMPTY :
+    # according to the choice of Neumann OR Dirichlet
+    # boundary conditions, the following fields will be overwritten with dirichlet_... or neumann_... BC
+right_boundary: none
+left_boundary: none
+bottom_boundary: none
+top_boundary: none

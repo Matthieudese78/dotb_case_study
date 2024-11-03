@@ -24,24 +24,35 @@ def main():
     maindir = os.path.dirname(__file__)
     # default .yaml file name :
     # default_input = 'ballistic_default_input.yaml'
-    default_input = 'rabbit_default_input.yaml'
+    # default_input = 'rabbit_default_input.yaml'
+    default_input = 'diffusion_2D_default_input.yaml'
     # Reading argument :
     # arg parsing for inputs :
     config_file_path = input.get_config_file(maindir, default_input)
     print(f'Using config file: {config_file_path}')
     # input.yaml --> config dict
     config = input.load_config(config_file_path)
+    # Checking the types of the input variables :
+    # (is the config dict conform to one of the tolerated TypedDict classes?)
+    input.check_type(config)
+
     print(f"Solving the {config['case']} case")
     print(f"using the {config['solver']} solver")
+
     # time vector :
     t = np.linspace(0, config['t_end'], config['n_t'])
 
     # y-initialization :
     #   n-dimensional tensor field y(t=0) from config :
-    y = init.intiate_y(**config)
+    #   some values in config dict are computed in initiate_y
+    #   --> config dict is therefore reloaded.
+    y, config = init.intiate_y(config)
+    #       ... then re-checked :
+    input.check_type(config)
+
     print(f'Initial solution = {y}')
     print(f'type y_0 = {type(y)}')
-    print(f'outupt type {type(init.intiate_y(**config))}')
+    print(f'outupt type {type(init.intiate_y(config))}')
 
     # Solver :
     sol = solver.euler_explicit(y, t, **config)
@@ -52,7 +63,7 @@ def main():
 
     # Post-treatment :
     t_save = t[::config['n_save']]
-    postt.postt_ballistic_2(t_save, sol, **config)
+    postt.plot_postt(t_save, sol, **config)
 
     # Example usage
     # def example_F(x, y, dydx):

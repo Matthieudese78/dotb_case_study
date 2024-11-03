@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 
+import dotb.boundary_conditions as BC
 import dotb.second_member as second
 
 
@@ -27,12 +28,14 @@ def euler_explicit(y: np.ndarray, t: np.ndarray, **kw) -> np.ndarray:
     sol = []
     sol.append(y)
     for i, ti in enumerate(t[:-1]):
+        # Apply the boundary conditions :
+        y = BC.boundary_conds(y, **kw)[0]
         # Apply Euler explicit formula
         y_new = y + dt * second.F(y, **kw)
         if ((i+1) % kw['n_save'] == 0):
             print(f'saving {i}^th time step')
             sol.append(y_new)
-            print(f'solver : sol = {sol}')
+            # print(f'solver : sol = {sol}')
         y = y_new
     return np.array(sol)
 

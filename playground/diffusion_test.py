@@ -70,9 +70,6 @@ def scalar_laplacian(data, discr, edge_order):
     return np.sum(grad2s, axis=0)
 
 
-2
-
-
 def scalar_laplacian_neumann_boundaries(data, discr, edge_order, D, **kw):
     grads = gradient(data, discr, edge_order)
     # 1D :
@@ -288,6 +285,7 @@ def diffusion(data, D, discr, edge_order=1, **kw):
             )
             for i, gradi in enumerate(grads)
         ]
+        grad2s = np.array(grad2s)
         # scalar laplacian :
         sl = np.sum(grad2s, axis=0)
 
@@ -295,7 +293,7 @@ def diffusion(data, D, discr, edge_order=1, **kw):
 
 
 # %% Set up the problem
-t = np.linspace(0, 1.0, 1000)
+t = np.linspace(0., 1.0, 1000)
 
 # Physics :
 # rabibts : 5 litters annualy of 10 kits each :
@@ -349,8 +347,25 @@ kw_neumann = {
     'bottom_boundary': 0.0,
     'top_boundary': 0.0,
 }
+dirichlet = True
 
-kw = kw_dirichlet
+if dirichlet:
+    neumann = False
+if not dirichlet:
+    neumann = True
+
+if dirichlet:
+    kw = kw_dirichlet
+    print(f"T_right = {kw_dirichlet['right_boundary']  }")
+    print(f"T_left = {kw_dirichlet['left_boundary']   }")
+    print(f"T_bottom = {kw_dirichlet['bottom_boundary'] }")
+    print(f"T_top = {kw_dirichlet['top_boundary']    }")
+if neumann:
+    kw = kw_neumann
+    print(f"Flow_right = {kw_neumann['right_boundary']  }")
+    print(f"Flow_left = {kw_neumann['left_boundary']   }")
+    print(f"Flow_bottom = {kw_neumann['bottom_boundary'] }")
+    print(f"Flow_top = {kw_neumann['top_boundary']    }")
 
 boundaries = boundary_conditions_2D(x, y, y0, **kw)
 
@@ -436,8 +451,9 @@ postt_2Dmap(x, y, SL_y0, 'Scalar Laplacian \n', 'X', 'Y', 'Scalar Laplacian')
 # %% diffusion coefficient map :
 D0 = 0.01
 # D = D0 * np.ones((nx, ny))
-D = D0 * np.array([[1. + (xi / lx) for xi in x] for yi in y])
-# D = D0 * np.array([[1.0 + (xi / lx) * (yi / ly) for xi in x] for yi in y])
+# D = np.random.uniform(D0, 10.*D0, size=(nx, ny))
+# D = D0 * np.array([[1. + (xi / lx) for xi in x] for yi in y])
+D = D0 * np.array([[1.0 + (xi / lx) * (yi / ly) for xi in x] for yi in y])
 # D = (D0/T0) * y0
 
 print(type(D))
@@ -448,15 +464,15 @@ print(type(D * y0))
 print(np.shape(D * y0))
 
 print(f'diffusion max value = {np.max(D)}')
+# %% Plot D : diffusion coeff
+postt_2Dmap(
+    x, y, D, 'Diffusion coefficient value \n', 'X', 'Y', 'Diffusion coefficient',
+)
 # %%
 F = scalar_laplacian(D * y0, discr, edge_order)
 print(type(F))
 print(np.shape(F))
 
-# %%
-postt_2Dmap(
-    x, y, D, 'Diffusion coefficient value \n', 'X', 'Y', 'Diffusion coefficient',
-)
 # %%
 grads = gradient(D, discr, edge_order)
 gradx = grads[0]
@@ -467,6 +483,10 @@ div = divergence(D, discr, edge_order)
 postt_2Dmap(x, y, gradx, 'x=gradient \n', 'X', 'Y', 'x-gradient')
 postt_2Dmap(x, y, grady, 'y=gradient \n', 'X', 'Y', 'y-gradient')
 postt_2Dmap(x, y, div, 'Divergence \n', 'X', 'Y', 'Divergence')
+
+# %% Second member : initial values
+Fini = diffusion(y0, D0, discr, edge_order=1, **kw)
+postt_2Dmap(x, y, Fini, 'F ini \n', 'X', 'Y', 'Second member ini')
 
 # %% solver :
 n_steps = len(t)

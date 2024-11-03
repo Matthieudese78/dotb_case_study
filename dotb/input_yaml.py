@@ -3,12 +3,13 @@ from __future__ import annotations
 
 import argparse
 import os
+import sys
 from typing import TypedDict
 
 import yaml
 
 
-class mydict_ballistic(TypedDict):
+class my_dict_ballistic(TypedDict):
     case: str
     solver: str
     save_dir: str
@@ -23,6 +24,100 @@ class mydict_ballistic(TypedDict):
     rho: float
     A: float
     c: float
+
+
+class my_dict_rabbit(TypedDict):
+    case: str
+    solver: str
+    save_dir: str
+    t_end: float
+    n_t: int
+    n_save: int
+    N_0: float
+    k: float
+    b: float
+
+
+class my_dict_diffusion_2D(TypedDict):
+    case: str
+    solver: str
+    save_dir: str
+    t_end: float
+    n_t: int
+    n_save: int
+
+    l_x: float
+    l_y: float
+
+    n_x: int
+    n_y: int
+
+    dx: float
+    dy: float
+
+    T_0: float
+
+    p_x: float
+    p_y: float
+
+    D_0: float
+    D_uni: bool
+    D_lin: bool
+    D: None
+
+    dirichlet: bool
+    neumann: bool
+
+    interpolation_coeff: float
+
+    dirichlet_right_boundary: float
+    dirichlet_left_boundary: float
+    dirichlet_bottom_boundary: float
+    dirichlet_top_boundary: float
+
+    neumann_right_boundary: float
+    neumann_left_boundary: float
+    neumann_bottom_boundary: float
+    neumann_top_boundary: float
+
+    right_boundary: float
+    left_boundary: float
+    bottom_boundary: float
+    top_boundary: float
+
+# Function "check_type" :
+# checks if the input dict belongs to one ofe the three classes :
+#  - my_dict_ballistic
+#  - my_dict_rabbit
+#  - my_dict_diffusion_2D
+
+
+def is_ballistic(d: dict) -> bool:
+    return all(key in d for key in list(my_dict_ballistic.__annotations__.keys()))
+
+
+def is_rabbit(d: dict) -> bool:
+    return all(key in d for key in list(my_dict_rabbit.__annotations__.keys()))
+
+
+def is_diffusion_2D(d: dict) -> bool:
+    return all(key in d for key in list(my_dict_diffusion_2D.__annotations__.keys()))
+
+
+def check_type(d: dict) -> str:
+    if is_ballistic(d):
+        return 'Ballistic'
+    if is_rabbit(d):
+        return 'Rabbit'
+    if is_diffusion_2D(d):
+        return 'Diffusion2D'
+    print('Input data error : check your input types.')
+    sys.exit()
+    return 'Unknown type'
+
+
+# my_dict : type being either one of the three possible TypedDict :
+my_dict = my_dict_ballistic | my_dict_rabbit | my_dict_diffusion_2D
 
 
 def get_config_file(default_config_path, default_input) -> str:
@@ -66,7 +161,7 @@ def get_config_file(default_config_path, default_input) -> str:
 # turns the entries of a config.yaml file into a dict :
 
 
-def load_config(file_path) -> mydict_ballistic:
+def load_config(file_path) -> my_dict:
     """
     Turns the entries of a config.yaml file into a dict.
     """
