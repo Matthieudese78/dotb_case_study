@@ -6,6 +6,7 @@ import os
 import sys
 from typing import TypedDict
 
+import numpy as np
 import yaml
 
 
@@ -63,7 +64,7 @@ class my_dict_diffusion_2D(TypedDict):
     D_0: float
     D_uni: bool
     D_lin: bool
-    D: None
+    D: None | np.ndarray
 
     dirichlet: bool
     neumann: bool
