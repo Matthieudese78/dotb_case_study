@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import matplotlib.pyplot as plt
 import numpy as np
+# from scipy.sparse.linalg import spsolve
+# from scipy.sparse import diags, identity
 
 
 # %%
@@ -16,8 +18,11 @@ def postt_2Dmap(x, y, data, title, labelx, labely, labelbar):
 
     # Plot scatter plot with colors determined by data values
     scatter = ax.scatter(
-        X.ravel(), Y.ravel(),
-        c=data.ravel(), cmap='inferno', s=100,
+        X.ravel(),
+        Y.ravel(),
+        c=data.ravel(),
+        cmap='inferno',
+        s=100,
     )
 
     # Set limits and aspect ratio
@@ -42,7 +47,10 @@ def gradient(data, discr, edge_order):
     [
         grads.append(
             np.gradient(
-                data, discr[i], axis=i, edge_order=edge_order,
+                data,
+                discr[i],
+                axis=i,
+                edge_order=edge_order,
             ),
         )
         for i, si in enumerate(np.shape(data))
@@ -59,7 +67,7 @@ def gradient_square(data, discr, edge_order):
     grads = gradient(data, discr, edge_order)
     grad2s = []
     [
-        grad2s.append(np.gradient(gradi, discr[i], axis=i, edge_order=2))
+        grad2s.append(np.gradient(gradi, discr[i], axis=i, edge_order=1))
         for i, gradi in enumerate(grads)
     ]
     return np.array(grad2s)
@@ -158,7 +166,8 @@ def boundary_conditions_2D(x, y, data, **kw):
             arr_bottom = np.concatenate(
                 (
                     arr_x_interp_lower_left,
-                    arr_bottom[ix_mid], arr_x_interp_lower_right,
+                    arr_bottom[ix_mid],
+                    arr_x_interp_lower_right,
                 ),
             )
 
@@ -174,7 +183,8 @@ def boundary_conditions_2D(x, y, data, **kw):
             arr_top = np.concatenate(
                 (
                     arr_x_interp_upper_left,
-                    arr_top[ix_mid], arr_x_interp_upper_right,
+                    arr_top[ix_mid],
+                    arr_x_interp_upper_right,
                 ),
             )
 
@@ -190,7 +200,8 @@ def boundary_conditions_2D(x, y, data, **kw):
             arr_left = np.concatenate(
                 (
                     arr_y_interp_lower_left,
-                    arr_left[iy_mid], arr_y_interp_upper_left,
+                    arr_left[iy_mid],
+                    arr_y_interp_upper_left,
                 ),
             )
 
@@ -207,14 +218,15 @@ def boundary_conditions_2D(x, y, data, **kw):
             arr_right = np.concatenate(
                 (
                     arr_y_interp_lower_right,
-                    arr_right[iy_mid], arr_y_interp_upper_right,
+                    arr_right[iy_mid],
+                    arr_y_interp_upper_right,
                 ),
             )
 
         return [arr_left, arr_bottom, arr_right, arr_top]
 
 
-def diffusion(data, D, discr, edge_order=1, **kw):
+def diffusion(data, D, discr, edge_order=1, **kw) -> np.ndarray:
     # 1D :
     if len(np.shape(data)) == 1:
         if kw['dirichlet']:
@@ -280,7 +292,10 @@ def diffusion(data, D, discr, edge_order=1, **kw):
         [
             grad2s.append(
                 np.gradient(
-                    gradi, discr[i], axis=i, edge_order=edge_order,
+                    gradi,
+                    discr[i],
+                    axis=i,
+                    edge_order=edge_order,
                 ),
             )
             for i, gradi in enumerate(grads)
@@ -292,8 +307,59 @@ def diffusion(data, D, discr, edge_order=1, **kw):
     return sl
 
 
+def apply_bounds(data, discr, **kw) -> np.ndarray:
+    # 1D :
+    if len(np.shape(data)) == 1:
+        if kw['dirichlet']:
+            data[0] = kw['left_boundary']
+            data[-1] = kw['right_boundary']
+        if kw['neumann']:
+            data[0] = data[1] - discr[0] * kw['left_boundary']
+            data[-1] = data[-2] + discr[0] * kw['right_boundary']
+
+    # 2D :
+    if len(np.shape(data)) == 2:
+        # Computations of boundary conditions :
+        boundaries = boundary_conditions_2D(x, y, data, **kw)
+        if kw['dirichlet']:
+            # returns a list left-bottom-right-top of interpolated thus C^1 boundary conditions
+            # setting y boundaries :
+            # left :
+            data[0, :] = boundaries[0]
+            # right :
+            data[-1, :] = boundaries[2]
+            # setting x boundaries :
+            # bottom :
+            data[:, 0] = boundaries[1]
+            # top :
+            data[:, -1] = boundaries[3]
+
+        if kw['neumann']:
+            # Rreproduction at the 1st order of the gradient values at the boundaries by modifying the border temperature values.
+            # Remark :
+            # - left border : (forward difference) grad = (T(x+dx) - T(x)) / dx
+            # - right border : (backward difference) grad = (T(x) - T(x-dx)) / dx
+            # - bottom border : (forward difference) grad = (T(y+dy) - T(y)) / dy
+            # - top border : (backward difference) grad = (T(y) - T(y-dy)) / dy
+
+            # setting x-gradient values :
+            # left :
+            data[0, :] = data[1, :] - discr[0] * boundaries[0]
+            # right :
+            data[-1, :] = data[-2, :] + discr[0] * boundaries[2]
+
+            # setting y-gradient values :
+            # bottom :
+            data[:, 0] = data[:, 1] - discr[1] * boundaries[1]
+            # top :
+            data[:, -1] = data[:, -2] + discr[1] * boundaries[3]
+
+    return data
+
+
 # %% Set up the problem
-t = np.linspace(0., 1.0, 1000)
+# t = np.linspace(0., 1.0, 1000)
+t = np.linspace(0.0, 1.0, 1000)
 
 # Physics :
 # rabibts : 5 litters annualy of 10 kits each :
@@ -304,8 +370,8 @@ lx = 1.0
 ly = 1.0
 # x = np.linspace(0.0, lx, nx)
 # y = np.linspace(0.0, ly, ny)
-x = np.linspace(-lx/2., lx/2., nx)
-y = np.linspace(-lx/2., ly/2., ny)
+x = np.linspace(-lx / 2.0, lx / 2.0, nx)
+y = np.linspace(-lx / 2.0, ly / 2.0, ny)
 # mesh = np.array([(xi,yj) for ])
 dx = x[1] - x[0]
 dy = y[1] - y[0]
@@ -325,7 +391,12 @@ y0 = T0 * (
 )
 
 postt_2Dmap(
-    x, y, y0, 'T init \n', 'X', 'Y',
+    x,
+    y,
+    y0,
+    'T init \n',
+    'X',
+    'Y',
     'Initial Temperature' + r'$(\degree)$',
 )
 # %% Limit conditions :
@@ -347,20 +418,18 @@ kw_neumann = {
     'bottom_boundary': 0.0,
     'top_boundary': 0.0,
 }
-dirichlet = True
+dirichlet = False
 
 if dirichlet:
     neumann = False
-if not dirichlet:
-    neumann = True
-
-if dirichlet:
     kw = kw_dirichlet
     print(f"T_right = {kw_dirichlet['right_boundary']  }")
     print(f"T_left = {kw_dirichlet['left_boundary']   }")
     print(f"T_bottom = {kw_dirichlet['bottom_boundary'] }")
     print(f"T_top = {kw_dirichlet['top_boundary']    }")
-if neumann:
+
+if not dirichlet:
+    neumann = True
     kw = kw_neumann
     print(f"Flow_right = {kw_neumann['right_boundary']  }")
     print(f"Flow_left = {kw_neumann['left_boundary']   }")
@@ -372,8 +441,10 @@ boundaries = boundary_conditions_2D(x, y, y0, **kw)
 # test with concatenated arrays : left-bottom-right-top :
 arr_test = np.concatenate(
     (
-        np.flip(boundaries[0]), boundaries[1],
-        boundaries[2], np.flip(boundaries[3]),
+        np.flip(boundaries[0]),
+        boundaries[1],
+        boundaries[2],
+        np.flip(boundaries[3]),
     ),
 )
 contour_test = np.linspace(0.0, 2.0 * lx + 2.0 * ly, len(arr_test))
@@ -466,7 +537,13 @@ print(np.shape(D * y0))
 print(f'diffusion max value = {np.max(D)}')
 # %% Plot D : diffusion coeff
 postt_2Dmap(
-    x, y, D, 'Diffusion coefficient value \n', 'X', 'Y', 'Diffusion coefficient',
+    x,
+    y,
+    D,
+    'Diffusion coefficient value \n',
+    'X',
+    'Y',
+    'Diffusion coefficient',
 )
 # %%
 F = scalar_laplacian(D * y0, discr, edge_order)
@@ -500,23 +577,84 @@ sol[..., 0] = y0
 
 print(type(sol[..., 0]))
 print(np.shape(sol[..., 0]))
+euler_explicit = False
+crank_nicolson = True
+if euler_explicit:
+    for i, ti in enumerate(t[:-1]):
+        F = diffusion(sol[..., i], D, discr, edge_order, **kw)
+        # F[:,0] = -F[:,1]
+        # F[0,:] = -F[1,:]
+        # F[-1,:] = -F[-2,:]
+        # F[:,-1] = -F[:,-2]
+        print(f'type(F) = {F}')
+        print(f'shape(F) = {np.shape(F)}')
+        print(f'type(yi) = {type(sol[...,i])}')
+        print(f'shape(yi) = {np.shape(sol[...,i])}')
+        sol[..., i + 1] = sol[..., i] + dt * F
 
-for i, ti in enumerate(t[:-1]):
-    F = diffusion(sol[..., i], D, discr, edge_order, **kw)
-    # F[:,0] = -F[:,1]
-    # F[0,:] = -F[1,:]
-    # F[-1,:] = -F[-2,:]
-    # F[:,-1] = -F[:,-2]
-    print(f'type(F) = {F}')
-    print(f'shape(F) = {np.shape(F)}')
-    print(f'type(yi) = {type(sol[...,i])}')
-    print(f'shape(yi) = {np.shape(sol[...,i])}')
-    sol[..., i + 1] = sol[..., i] + dt * F
+if crank_nicolson:
+    y0 = apply_bounds(y0, discr, **kw)
+    yini = y0
+    niter_max = 10
+    tol = 1.0e-1 * T0
+    print(f'Crank-Nicolson y : {np.shape(y0)}')
+    # Fist estimation of the y1 : euler explicit
+    f = diffusion(yini, D, discr, edge_order, **kw)
+    print(f'Crank-Nicolson f : {np.shape(f)}')
+    y1 = yini + dt * f
+
+    for i, ti in enumerate(t[:-1]):
+        for iter in range(niter_max):
+            # new y1 right hand side :
+            y1 = apply_bounds(y1, discr, **kw)
+            f1 = scalar_laplacian(D * y1, discr, edge_order)
+            # Residual's Jacobian :
+            jacobian = np.eye(nx, M=ny, dtype=yini.dtype) - (dt / 2.0) * f1
+            # print(f'shape(jacobian) {np.shape(jacobian)}')
+            # Flattening arrays :
+            y0 = y0.flatten()
+            f = f.flatten()
+            y1 = y1.flatten()
+            f1 = f1.flatten()
+            # print(f'y0 = {y0}')
+            # print(f'y1 = {y1}')
+            # print(f'f = {f}')
+            # print(f'f1 = {f1}')
+            # Matching residu :
+            residual = y1 - y0 - (dt / 2.0) * (f + f1)
+            # print(f'residual shape = {residual.shape}')
+            # solving :
+            # delta_y = spsolve(jacobian, -residual)
+            delta_y = np.matmul(
+                np.linalg.inv(jacobian), -
+                residual.reshape(yini.shape),
+            )
+            delta_y = delta_y.flatten()
+            # Incrementing y1 :
+            y0 = y1
+            f = f1
+            y1 += delta_y
+            # Reshape :
+            y0 = y0.reshape(yini.shape)
+            f = f.reshape(yini.shape)
+            y1 = y1.reshape(yini.shape)
+            # Check for convergence :
+            residual_norm = np.linalg.norm(delta_y)
+            if residual_norm < tol:
+                print('convergence')
+                break
+
+        sol[..., i + 1] = y1
 
 # %%
 postt_2Dmap(
-    x, y, sol[..., 20],
-    'solution 5^th rime step \n', 'X', 'Y', 'Temperature',
+    x,
+    y,
+    sol[..., 20],
+    'solution 5^th rime step \n',
+    'X',
+    'Y',
+    'Temperature',
 )
 # %%
 postt_2Dmap(x, y, sol[..., -1], 'final solution \n', 'X', 'Y', 'Temperature')
