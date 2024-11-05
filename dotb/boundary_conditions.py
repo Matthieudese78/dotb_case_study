@@ -34,7 +34,6 @@ def boundary_conds(data, **kw) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 
     # 2D :
     if len(np.shape(data)) == 2:
-        print('boundary_conds : 2D case')
         # Domain coordinates :
         x = np.linspace(-kw['l_x']/2., kw['l_x']/2., kw['n_x'])
         y = np.linspace(-kw['l_x']/2., kw['l_y']/2., kw['n_y'])
@@ -49,7 +48,6 @@ def boundary_conds(data, **kw) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         arr_top = kw['top_boundary'] * np.ones_like(arr_bottom)
 
         if kw['interpolation_coeff'] > 0.0:
-            print('   boundary_conds : interpolation')
             if kw['dirichlet']:
                 val_lower_left = np.mean(
                     [kw['left_boundary'], kw['bottom_boundary']],

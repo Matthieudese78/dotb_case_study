@@ -95,13 +95,11 @@ def intiate_y(kw: dict) -> tuple:
             kw['top_boundary'] = kw['neumann_top_boundary']
 
         # Debug : postt of input data :
-        print(f'intiate_y np.shape(y_0) = {np.shape(y_0)}')
         input_dir = kw['save_dir'] + 'input/'
         if not os.path.exists(input_dir):
             os.makedirs(input_dir)
         bc_condtions = BC.boundary_conds(y_0, **kw)
         y_0 = bc_condtions[0]
-        print(f'intiate_y after BC : np.shape(y_0) = {np.shape(y_0)}')
 
         # plotting y_0 :
         save_name = 'T_field_ini'
@@ -183,7 +181,6 @@ def intiate_y(kw: dict) -> tuple:
 
         # plotting second member F initial value :
         sec_0 = second.F(y_0, **kw)
-        print(f'type sec_0 : {type(sec_0)}')
         save_name = 'F_ini'
         title = 'F at t = 0 s \n'
         labelx = 'X (m)'

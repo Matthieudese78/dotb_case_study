@@ -10,7 +10,6 @@ def F(y, **kw):
     if kw['case'] == 'rabbit':
         return rabbit(y, kw['k'], kw['b'])
     if kw['case'] == 'diffusion_2D':
-        print('second.F : calling diffusion')
         return diffusion(y, edge_order=1, **kw)
 
 
@@ -90,8 +89,8 @@ def divergence(data, discr, edge_order=1):
 
 
 def diffusion(data, edge_order=1, **kw):
-    print(f'second.diffusion : np.shape(data) = {np.shape(data)}')
-    print(f'second.diffusion : len(np.shape(data)) = {len(np.shape(data))}')
+    # print(f'second.diffusion : np.shape(data) = {np.shape(data)}')
+    # print(f'second.diffusion : len(np.shape(data)) = {len(np.shape(data))}')
     """
     Difffusion for F(x,y,dydx')
 
@@ -136,6 +135,5 @@ def diffusion(data, edge_order=1, **kw):
         ]
         # scalar laplacian :
         sl = np.sum(grad2s, axis=0)
-        print(f'second.diffusion : type(sl) = {type(sl)}')
 
     return sl
