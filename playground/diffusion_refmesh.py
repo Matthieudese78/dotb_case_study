@@ -572,19 +572,19 @@ def apply_bounds(mesh: Mesh, data: np.ndarray, **kw) -> np.ndarray:
             # - top border : (backward difference) grad = (T(y) - T(y-dy)) / dy
             #   todo : multiply with D once the config class created :
             # x-gradient left = boundaries[0]
-            #          BC_0 = grad_x_0 = (data[:, 1] - data[:, 0]) / mesh.delta_x_minus[:, 0]
-            data[:, 0] = data[:, 1] - boundaries[0] * mesh.delta_x_minus[:, 0]
+            #          BC_0 = grad_x_0 :
+            data[0, :] = data[1, :] - boundaries[0] * mesh.delta_x_minus[0, :]
             # x-gradient right = boundaries[2]
-            #          BC_n = grad_x_n = (data[:, -1] - data[:, -2]) / mesh.delta_x_plus[:, -1]
-            data[:, -1] = mesh.delta_x_plus[:, -1] * \
-                boundaries[2] + data[:, -2]
+            #          BC_n = grad_x_n :
+            data[-1, :] = mesh.delta_x_plus[-1, :] * \
+                boundaries[2] + data[-2, :]
             # y-gradient bottom = boundaries[1]
-            #          BC_0 = grad_y_0 = (data[1, :] - data[0, :]) / mesh.delta_y_minus[0, :]
-            data[0, :] = data[1, :] - mesh.delta_y_minus[0, :] * boundaries[1]
+            #          BC_0 = grad_y_0 :
+            data[:, 0] = data[:, 1] - mesh.delta_y_minus[:, 0] * boundaries[1]
             # y-gradient top = boundaries[3]
-            #          BC_n = grad_y_n = (data[-1, :] - data[-2, :]) / mesh.delta_y_minus[-1, :]
-            data[-1, :] = mesh.delta_y_plus[-1, :] * \
-                boundaries[3] + data[-2, :]
+            #          BC_n = grad_y_n :
+            data[:, -1] = mesh.delta_y_plus[:, -1] * \
+                boundaries[3] + data[:, -2]
 
     return data
 
@@ -833,7 +833,7 @@ kw_neumann = {
     'bottom_boundary': 0.0,
     'top_boundary': 0.0,
 }
-dirichlet = True
+dirichlet = False
 # neumann =  True
 
 if dirichlet:
