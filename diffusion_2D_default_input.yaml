@@ -4,23 +4,29 @@
 # - diffusion
 case: "diffusion_2D"
 # Solver :
-solver: "euler_explicit"
+# solver: "euler_explicit"
+# solver: "adams_bashforth"
+solver: "crank_nicolson"
 # Saving results directory :
 save_dir: "/home/matthieu/Documents/dotblocks/dotb_case_study/results/diffusion_2D/"
 # Calculus duration :
 t_end: 10.
+# t_end: 0.005
 # Time step number :
 n_t: 10000
+# n_t: 5
 # save every ... :
 n_save: 400
+# n_save: 40
+# n_save: 1
 # x axis domain width :
 l_x: 1.
 # y axis domain width :
 l_y: 1.
 # x axis discretization :
-n_x: 100
+n_x: 10
 # y axis discretization :
-n_y: 100
+n_y: 10
 # EMPTY : x & y increments
 # (computed at runtime based on the input data)
 dx: none
