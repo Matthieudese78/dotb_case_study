@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # %%
 from __future__ import annotations
+import os
 
 import matplotlib.cm as mplcm
 import matplotlib.colors as mplcolors
@@ -10,16 +11,21 @@ from matplotlib import gridspec
 from scipy.sparse import diags
 from scipy.sparse import identity
 from scipy.sparse import kron
-from scipy.sparse import lil_matrix
-from scipy.sparse.linalg import inv as spinv
-from scipy.sparse.linalg import spsolve
+# from scipy.sparse import lil_matrix
+# from scipy.sparse.linalg import inv as spinv
+# from scipy.sparse.linalg import spsolve
+from scipy.linalg import solve 
 
 from dotb.refined_mesh_class import Mesh
 
+
 # from scipy.sparse import diags, identity
-# %%
 
-
+#%%
+repsave = '/home/matthieu/Documents/dotblocks/dotb_case_study/playground/results/diffusion_refmesh/'
+if not os.path.exists(repsave):
+    os.makedirs(repsave)
+#%%
 def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
     new_cmap = mplcolors.LinearSegmentedColormap.from_list(
         f'trunc({cmap.name},{minval:.2f},{maxval:.2f})',
@@ -32,7 +38,7 @@ def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
 cmapinf = truncate_colormap(mplcm.inferno, 0.0, 0.9, n=100)
 
 
-def postt_2Dmap(mesh: Mesh, data, title, labelx, labely, labelbar, s=5):
+def postt_2Dmap(mesh: Mesh, data, title, labelx, labely, labelbar, s=5,repsave=repsave):
     # Create meshgrid for plotting
     X = mesh.X
     Y = mesh.Y
@@ -62,7 +68,8 @@ def postt_2Dmap(mesh: Mesh, data, title, labelx, labely, labelbar, s=5):
     cbar.ax.set_ylabel(f'{labelbar}')
 
     plt.title(f'{title}')
-    plt.show()
+    # plt.show()
+    plt.savefig(repsave+title+'.png')
     plt.close('all')
 
 
@@ -76,16 +83,17 @@ def postt_2Dmap_interior(
     limitbar,
     s=5,
     alpha=1.0,
+    repsave=repsave,
 ):
     # Create meshgrid for plotting
     # x = mesh.X[:, 0][1:-1]
     # y = mesh.Y[0, :][1:-1]
     x = mesh.X[1:-1, 1:-1][:, 0]
     y = mesh.Y[1:-1, 1:-1][0, :]
-    print(x.shape)
-    print(y.shape)
-    print(x)
-    print(y)
+    # print(x.shape)
+    # print(y.shape)
+    # print(x)
+    # print(y)
     X, Y = np.meshgrid(x, y)
     # Create figure and axis
     f = plt.figure(figsize=(8, 6))
@@ -129,7 +137,8 @@ def postt_2Dmap_interior(
     ).formatter.set_useOffset(False)
     f.tight_layout(pad=0.5)
 
-    plt.show()
+    # plt.show()
+    plt.savefig(repsave+title+'.png')
     plt.close('all')
 
 
@@ -215,8 +224,10 @@ def divergence_mesh(mesh: Mesh, data: np.ndarray) -> np.ndarray:
 def gradient_square_mesh(mesh: Mesh, data: np.ndarray) -> np.ndarray:
     grads = gradient_mesh(mesh, data)
     grad_square = []
-    [grad_square.append(gradient_mesh(mesh, gradi)[i])
-     for i, gradi in enumerate(grads)]
+    [
+        grad_square.append(gradient_mesh(mesh, gradi)[i])
+        for i, gradi in enumerate(grads)
+    ]
     return np.array(grad_square)
 
 
@@ -225,8 +236,10 @@ def F_diffusion(mesh: Mesh, data: np.ndarray, D: np.ndarray) -> np.ndarray:
     grads[0] = D * grads[0]
     grads[1] = D * grads[1]
     grad2 = []
-    [grad2.append(gradient_mesh(mesh, gradi)[i])
-     for i, gradi in enumerate(grads)]
+    [
+        grad2.append(gradient_mesh(mesh, gradi)[i])
+        for i, gradi in enumerate(grads)
+    ]
     return np.sum(np.array(grad2), axis=0)
 
 
@@ -355,13 +368,17 @@ def boundary_conditions_2D_mesh(mesh: Mesh, data: np.ndarray, **kw) -> list:
 
         ix_sup = np.where(x >= x[0] + mesh.lx * (1.0 - alpha))
         ix_mid = np.where(
-            (x > x[0] + mesh.lx * alpha) & (x <
-                                            x[0] + mesh.lx * (1.0 - alpha)),
+            (x > x[0] + mesh.lx * alpha) & (
+                x <
+                x[0] + mesh.lx * (1.0 - alpha)
+            ),
         )
         iy_sup = np.where(y >= y[0] + mesh.ly * (1.0 - alpha))
         iy_mid = np.where(
-            (y > y[0] + mesh.ly * alpha) & (y <
-                                            y[0] + mesh.ly * (1.0 - alpha)),
+            (y > y[0] + mesh.ly * alpha) & (
+                y <
+                y[0] + mesh.ly * (1.0 - alpha)
+            ),
         )
 
         vlim_x = mesh.lx * alpha
@@ -595,17 +612,17 @@ def apply_bounds(mesh: Mesh, data: np.ndarray, **kw) -> np.ndarray:
             # setting y boundaries :
             # left :
             data[0, :] = boundaries[0]
-            print('left boundary OK')
+            # print('left boundary OK')
             # right :
             data[-1, :] = boundaries[2]
-            print('right boundary OK')
+            # print('right boundary OK')
             # setting x boundaries :
             # bottom :
             data[:, 0] = boundaries[1]
-            print('bottom boundary OK')
+            # print('bottom boundary OK')
             # top :
             data[:, -1] = boundaries[3]
-            print('top boundary OK')
+            # print('top boundary OK')
 
         if kw['neumann']:
             # Rreproduction at the 1st order of the gradient values at the boundaries by modifying the border temperature values.
@@ -632,10 +649,9 @@ def apply_bounds(mesh: Mesh, data: np.ndarray, **kw) -> np.ndarray:
 
     return data
 
-
 # %% Set up the problem
-# time :
-t_end = 1.0
+# # time :
+# t_end = 1.0
 # # mesh :
 # lx = 1.0
 # ly = 2.0
@@ -647,17 +663,44 @@ t_end = 1.0
 # x_refine_percent = 20.0
 # y_refine_percent = 20.0
 
+#### Works for Crank Nicolson with D = 1.e-2 !!
+# # time :
+# t_end = 1.0
+# # mesh :
+# lx = 1.0
+# ly = 1.0
+# dx_fine = 0.005
+# dy_fine = 0.005
+# dx_coarse = 4.0 * dx_fine
+# dy_coarse = 4.0 * dy_fine
+# x_refine_percent = 10.
+# y_refine_percent = 10.
+
+#### Works for Crank Nicolson with D = 1.e-2 & uniform dirichlet boundaries = 21 degrees !!
+# # time :
+# t_end = 2.0
+# # mesh :
+# lx = 1.0
+# ly = 1.0
+# dx_fine = 0.005
+# dy_fine = 0.005
+# dx_coarse = 4.0 * dx_fine
+# dy_coarse = 4.0 * dy_fine
+# x_refine_percent = 5.
+# y_refine_percent = 5.
+
+#### Works for Crank Nicolson with D = 1.e-2 & uniform dirichlet boundaries = 22 degrees !!
 # time :
-t_end = 1.0
+t_end = 10.0
 # mesh :
 lx = 1.0
 ly = 1.0
-dx_fine = 0.01
-dy_fine = 0.01
+dx_fine = 0.005
+dy_fine = 0.005
 dx_coarse = 4.0 * dx_fine
 dy_coarse = 4.0 * dy_fine
-x_refine_percent = 5.0
-y_refine_percent = 5.0
+x_refine_percent = 2.5
+y_refine_percent = 2.5
 
 mesh = Mesh(
     lx=lx,
@@ -673,14 +716,52 @@ mesh = Mesh(
 mesh.visualize()
 
 print(mesh.Y.shape)
-print(mesh.delta_x_plus.shape)
-print(mesh.delta_y_plus.shape)
+# print(mesh.delta_x_plus.shape)
+# print(mesh.delta_y_plus.shape)
 
 # mesh.X_pos = positions[0].reshape(22,22)
 # mesh.Y_pos = positions[1].reshape(21, 41)
 
 # list_of_points = np.c_[mesh.X.ravel(), mesh.Y.ravel()].shape
 # index_positions = np.c_[mesh.X.ravel(), mesh.Y.ravel()].shape
+
+# %% Limit conditions :
+kw_dirichlet = {
+    'neumann': False,
+    'dirichlet': True,
+    'interpolation_coeff': 0.2,
+    'left_boundary': 10.0,
+    'bottom_boundary': 30.0,
+    'right_boundary': 20.0,
+    'top_boundary': 5.0,
+}
+kw_neumann = {
+    'neumann': True,
+    'dirichlet': False,
+    'interpolation_coeff': 0.2,
+    'right_boundary': -1.0,
+    'left_boundary': 1.0,
+    'bottom_boundary': 0.0,
+    'top_boundary': 0.0,
+}
+dirichlet = True
+# neumann =  True
+
+if dirichlet:
+    neumann = False
+    kw = kw_dirichlet
+    # print(f"T_right = {kw_dirichlet['right_boundary']  }")
+    # print(f"T_left = {kw_dirichlet['left_boundary']   }")
+    # print(f"T_bottom = {kw_dirichlet['bottom_boundary'] }")
+    # print(f"T_top = {kw_dirichlet['top_boundary']    }")
+
+if not dirichlet:
+    neumann = True
+    kw = kw_neumann
+    # print(f"Flow_right = {kw_neumann['right_boundary']  }")
+    # print(f"Flow_left = {kw_neumann['left_boundary']   }")
+    # print(f"Flow_bottom = {kw_neumann['bottom_boundary'] }")
+    # print(f"Flow_top = {kw_neumann['top_boundary']    }")
 # %% Test scalar laplacian tensorial computation :
 # Parameters
 Nx, Ny = 5, 8  # Number of points in x and y directions
@@ -689,8 +770,8 @@ dx, dy = 0.1, 0.1  # Grid spacing in x and y directions
 # Create 1D Laplacian matrices in x and y directions for interior points
 Lx = diags([1, -2, 1], [-1, 0, 1], shape=(Nx, Nx)) / dx**2
 Ly = diags([1, -2, 1], [-1, 0, 1], shape=(Ny, Ny)) / dy**2
-print(f'Lx = {Lx.toarray()}')
-print(f'Ly = {Ly.toarray()}')
+# print(f'Lx = {Lx.toarray()}')
+# print(f'Ly = {Ly.toarray()}')
 
 # Display Lx
 plt.subplot(1, 2, 1)
@@ -703,7 +784,7 @@ plt.subplot(1, 2, 2)
 plt.title('Ly Sparsity Pattern')
 plt.spy(Ly, markersize=1)
 
-plt.show()
+# plt.show()
 plt.close('all')
 
 # Convert to LIL format to allow for easy modification at boundary points
@@ -716,8 +797,8 @@ Ly = Ly.tolil()
 # Construct the 2D Laplacian operator using Kronecker products
 Ix = identity(Nx)
 Iy = identity(Ny)
-print(f'Ix = {Ix.toarray()}')
-print(f'Iy = {Iy.toarray()}')
+# print(f'Ix = {Ix.toarray()}')
+# print(f'Iy = {Iy.toarray()}')
 
 L = kron(Iy, Lx) + kron(Ly, Ix)
 
@@ -737,17 +818,21 @@ plt.subplot(1, 2, 2)
 plt.title('Ly Sparsity Pattern')
 plt.spy(kron(Ly, Ix), markersize=1)
 
-plt.show()
+# plt.show()
 plt.close('all')
 
 
 # %%
 def scalar_laplacian_tensor_uniform(mesh: Mesh):
     # Uniform mesh :
-    Lx = diags([1, -2, 1], [-1, 0, 1],
-               shape=(mesh.nx, mesh.nx)) / mesh.dx_fine**2
-    Ly = diags([1, -2, 1], [-1, 0, 1],
-               shape=(mesh.ny, mesh.ny)) / mesh.dy_fine**2
+    Lx = diags(
+        [1, -2, 1], [-1, 0, 1],
+        shape=(mesh.nx, mesh.nx),
+    ) / mesh.dx_fine**2
+    Ly = diags(
+        [1, -2, 1], [-1, 0, 1],
+        shape=(mesh.ny, mesh.ny),
+    ) / mesh.dy_fine**2
 
     # Convert to LIL format to allow for easy modification at boundary points
     Lx = Lx.tolil()
@@ -773,8 +858,8 @@ def scalar_laplacian_tensor_uniform(mesh: Mesh):
 
 
 sl_mesh = scalar_laplacian_tensor_uniform(mesh)
-print(type(sl_mesh))
-print(sl_mesh.shape)
+# print(type(sl_mesh))
+# print(sl_mesh.shape)
 
 # %% Non-Uniform mesh :
 # hd = mesh.delta_x_plus
@@ -790,18 +875,18 @@ lower_diag = hd**2 / (hs * hd * (hd + hs))
 
 # %%
 M = np.random.randint(10, size=(3, 3))
-print(M)
+# print(M)
 Ix = identity(2)
-print(kron(Ix, M).toarray())
-print(kron(Ix, M).toarray().shape)
-print(kron(M, Ix).toarray())
-print('Padding')
+# print(kron(Ix, M).toarray())
+# print(kron(Ix, M).toarray().shape)
+# print(kron(M, Ix).toarray())
+# print('Padding')
 M = np.pad(M, ((1, 1), (1, 1)), mode='constant')
-print(M)
+# print(M)
 # %%
 
 
-def gradient_x_tensor(mesh: Mesh, D=np.eye(mesh.nx)):
+def gradient_x_tensor(mesh: Mesh):
     # hd = mesh.delta_x_plus[:, 1:-1][:, 0]
     # hs = mesh.delta_x_minus[:, 1:-1][:, 0]
     hd = mesh.delta_x_plus[:, 0]
@@ -857,8 +942,6 @@ def gradient_x_tensor(mesh: Mesh, D=np.eye(mesh.nx)):
     # additional :
     Lx[1, 0] = -1 / (2.*mesh.delta_x_minus[0, 0])
     Lx[-2, -1] = 1 / (2.*mesh.delta_x_plus[-1, -1])
-    # Multiplication by the diffusion coefficent :
-    Lx = D*Lx
     # # Construct the 2D Laplacian operator using Kronecker products
     Iy = identity(mesh.ny)
 
@@ -947,7 +1030,7 @@ plt.spy(
 )  # markersize controls the dot size for each non-zero element
 
 
-plt.show()
+# plt.show()
 plt.close('all')
 # %% checke interior points delta_x + & delta_x minus values :
 
@@ -958,8 +1041,10 @@ postt_2Dmap_interior(
     'X',
     'Y',
     'delta_x_minus',
-    limitbar=[0.9 * np.min(mesh.delta_x_minus), 1.1 *
-              np.max(mesh.delta_x_minus)],
+    limitbar=[
+        0.9 * np.min(mesh.delta_x_minus), 1.1 *
+        np.max(mesh.delta_x_minus),
+    ],
     s=10,
 )
 # %%
@@ -970,8 +1055,10 @@ postt_2Dmap_interior(
     'X',
     'Y',
     'delta_x_plus',
-    limitbar=[0.9 * np.min(mesh.delta_x_plus), 1.1 *
-              np.max(mesh.delta_x_plus)],
+    limitbar=[
+        0.9 * np.min(mesh.delta_x_plus), 1.1 *
+        np.max(mesh.delta_x_plus),
+    ],
 )
 # %%
 postt_2Dmap_interior(
@@ -981,8 +1068,10 @@ postt_2Dmap_interior(
     'y',
     'Y',
     'delta_y_minus',
-    limitbar=[0.9 * np.min(mesh.delta_y_minus), 1.1 *
-              np.max(mesh.delta_y_minus)],
+    limitbar=[
+        0.9 * np.min(mesh.delta_y_minus), 1.1 *
+        np.max(mesh.delta_y_minus),
+    ],
     s=10,
 )
 
@@ -993,8 +1082,10 @@ postt_2Dmap_interior(
     'y',
     'Y',
     'delta_y_plus',
-    limitbar=[0.9 * np.min(mesh.delta_y_plus), 1.1 *
-              np.max(mesh.delta_y_plus)],
+    limitbar=[
+        0.9 * np.min(mesh.delta_y_plus), 1.1 *
+        np.max(mesh.delta_y_plus),
+    ],
     s=10,
 )
 # %% intial solution :
@@ -1116,16 +1207,16 @@ postt_2Dmap(
 )
 # %%
 M = np.random.randint(10, size=(5, 3))
-print(M)
+# print(M)
 right_column = np.random.randint(10, size=(5))
-print(f'right col : {right_column}')
-print(f'right stacking : {np.hstack((M, right_column.reshape(-1,1)))}')
+# print(f'right col : {right_column}')
+# print(f'right stacking : {np.hstack((M, right_column.reshape(-1,1)))}')
 
 M = np.random.randint(10, size=(5, 3))
-print(M)
+# print(M)
 left_column = np.random.randint(10, size=(5))
-print(f'left col : {left_column}')
-print(f'left stacking : {np.hstack((left_column.reshape(-1,1),M))}')
+# print(f'left col : {left_column}')
+# print(f'left stacking : {np.hstack((left_column.reshape(-1,1),M))}')
 
 # M = np.random.randint(10, size=(5, 3))
 # print(M)
@@ -1135,43 +1226,6 @@ print(f'left stacking : {np.hstack((left_column.reshape(-1,1),M))}')
 # lower_line = np.random.randint(10, size=(3))
 # print(f"lower line : {lower_line}")
 # print(f"lower stacking : {np.vstack((M,lower_line))}")
-# %% Limit conditions :
-kw_dirichlet = {
-    'neumann': False,
-    'dirichlet': True,
-    'interpolation_coeff': 0.2,
-    'left_boundary': 25.0,
-    'bottom_boundary': 30.0,
-    'right_boundary': 35.0,
-    'top_boundary': 40.0,
-}
-kw_neumann = {
-    'neumann': True,
-    'dirichlet': False,
-    'interpolation_coeff': 0.2,
-    'right_boundary': -1.0,
-    'left_boundary': 1.0,
-    'bottom_boundary': 0.0,
-    'top_boundary': 0.0,
-}
-dirichlet = False
-# neumann =  True
-
-if dirichlet:
-    neumann = False
-    kw = kw_dirichlet
-    print(f"T_right = {kw_dirichlet['right_boundary']  }")
-    print(f"T_left = {kw_dirichlet['left_boundary']   }")
-    print(f"T_bottom = {kw_dirichlet['bottom_boundary'] }")
-    print(f"T_top = {kw_dirichlet['top_boundary']    }")
-
-if not dirichlet:
-    neumann = True
-    kw = kw_neumann
-    print(f"Flow_right = {kw_neumann['right_boundary']  }")
-    print(f"Flow_left = {kw_neumann['left_boundary']   }")
-    print(f"Flow_bottom = {kw_neumann['bottom_boundary'] }")
-    print(f"Flow_top = {kw_neumann['top_boundary']    }")
 
 # boundaries = boundary_conditions_2D(mesh.X[0, :], mesh.Y[:, 0], y0, **kw)
 
@@ -1203,38 +1257,43 @@ contour_test = np.concatenate((xleft, xbottom, xright, xtop))
 # contour_test = np.concatenate(mesh.Y[:, 0], mesh.X[0, :], mesh.Y[:, -1], mesh.X[-1, :])
 
 
-plt.scatter(mesh.Y[0, :], boundaries[0], s=4)
-plt.title('left interpolated array')
-plt.show()
+plt.scatter(xleft, boundaries[0], s=4)
+title = 'left interpolated array'
+# plt.show()
 plt.close('all')
-print(f'len(boundaries[1]) = {len(boundaries[1])}')
+# print(f'len(boundaries[1]) = {len(boundaries[1])}')
 # %%
 plt.scatter(mesh.Y[-1, :], boundaries[2], s=4)
-plt.title('right interpolated array')
-plt.show()
+title = 'right interpolated array'
+# plt.show()
 plt.close('all')
-print(f'len(boundaries[3]) = {len(boundaries[3])}')
+plt.savefig(repsave+title+'.png')
+# print(f'len(boundaries[3]) = {len(boundaries[3])}')
 
 plt.scatter(mesh.X[:, 0], boundaries[1], s=4)
-plt.title('bottom interpolated array')
-plt.show()
+title = 'bottom interpolated array'
+plt.savefig(repsave+title+'.png')
+# plt.show()
 plt.close('all')
 
 plt.scatter(mesh.X[:, -1], boundaries[3], s=4)
-plt.title('top interpolated array')
-plt.show()
+title = 'top interpolated array'
+plt.savefig(repsave+title+'.png')
+# plt.show()
 plt.close('all')
 
-print(f'len(contour) = {len(contour_test)}')
-print(f'len(interpolated array) = {len(arr_test)}')
+# print(f'len(contour) = {len(contour_test)}')
+#%% print(f'len(interpolated array) = {len(arr_test)}')
 plt.scatter(contour_test, arr_test, s=4)
-plt.title('Concatenated interpolated array')
-plt.show()
+title = 'Concatenated interpolated array'
+plt.savefig(repsave+title+'.png')
+# plt.show()
 plt.close('all')
 
 
 # %% diffusion coefficient map :
-D0 = 1.0e-2
+D0 = 1.e-2
+# D0 = 1.0e-2
 # uniform
 #  = D0 * np.ones((nx, ny))
 D = D0 * np.ones_like(mesh.X)
@@ -1243,28 +1302,31 @@ D = D0 * np.ones_like(mesh.X)
 # D = D0 * (np.array([[1.0 + (xi / lx) * (yi / ly) for xi in x] for yi in y]))
 # D = (D0/T0) * y0
 
-print(type(D))
-print(type(y0))
-print(np.shape(D))
-print(np.shape(y0))
-print(type(D * y0))
-print(np.shape(D * y0))
+# print(type(D))
+# print(type(y0))
+# print(np.shape(D))
+# print(np.shape(y0))
+# print(type(D * y0))
+# print(np.shape(D * y0))
 
-print(f'diffusion max value = {np.max(D)}')
+# print(f'diffusion max value = {np.max(D)}')
 
 # %% CFL criteria :
 # np.max(D) * dt / (np.min(dx,dy))**2 <= 1./2.
 val_D_max = D[np.unravel_index(np.argmax(D, axis=None), D.shape)]
 min_spatial_discr = np.min([mesh.dx_fine, mesh.dy_fine])
-dt = 0.25 * (0.5 * (min_spatial_discr**2) / val_D_max)
-print(f'min spatial discr = {min_spatial_discr}')
+dt = 0.9 * (0.5 * (min_spatial_discr**2) / val_D_max)
+# dt = 0.9 * (0.5 * (min_spatial_discr) / val_D_max)
+# print(f'min spatial discr = {min_spatial_discr}')
+# print(f'dt = {dt}')
 
 n_t = int(t_end / dt) + 1
 
 t = np.linspace(0.0, t_end, n_t)
-nsave = int(len(t) / 25.) + 1
+n_save = int(len(t) / 25.) + 1
 
-print(f'len(t) = {len(t)}')
+# print(f'len(t) = {len(t)}')
+# print(f'n_save = {n_save}')
 # %% Plot D : diffusion coeff
 postt_2Dmap(
     mesh,
@@ -1284,11 +1346,11 @@ postt_2Dmap(mesh, Fini, 'F ini \n', 'X', 'Y', 'Second member ini', s=spoints)
 
 # BCs = boundary_conditions_2D(mesh.X[0, :], mesh.Y[:, 0], y0, **kw)
 BCs = boundary_conditions_2D_mesh(mesh, y0, **kw)
-print(len(BCs[0]))
-print(len(BCs[1]))
-print(len(BCs[2]))
-print(len(BCs[3]))
-print(np.shape(y0))
+# print(len(BCs[0]))
+# print(len(BCs[1]))
+# print(len(BCs[2]))
+# print(len(BCs[3]))
+# print(np.shape(y0))
 
 y0 = apply_bounds(mesh, y0, **kw)
 # %%
@@ -1301,7 +1363,7 @@ postt_2Dmap(
     'X',
     'Y',
     'Second member ini',
-    s=spoints,
+    s=spoints/5,
 )
 
 scalar_laplacian_value_BC = scalar_laplacian_tensor(mesh) @ ((D*y0).flatten())
@@ -1313,12 +1375,12 @@ postt_2Dmap(
     'X',
     'Y',
     'Second member ini',
-    s=spoints,
+    s=spoints/5,
 )
 # %% solver :
 n_steps = len(t)
 dt = t[1] - t[0]
-print(f'dt = {dt}')
+# print(f'dt = {dt}')
 
 # %% initialization :
 sol = []
@@ -1351,12 +1413,12 @@ if euler_explicit:
         # F[0,:] = -F[1,:]
         # F[-1,:] = -F[-2,:]
         # F[:,-1] = -F[:,-2]
-        print(f'type(F) = {F}')
-        print(f'shape(F) = {np.shape(F)}')
-        print(f'type(yi) = {type(sol[...,i])}')
-        print(f'shape(yi) = {np.shape(sol[...,i])}')
+        # print(f'type(F) = {F}')
+        # print(f'shape(F) = {np.shape(F)}')
+        # print(f'type(yi) = {type(sol[...,i])}')
+        # print(f'shape(yi) = {np.shape(sol[...,i])}')
         y1 = y + dt * F
-        if (i + 1) % kw['n_save'] == 0:
+        if (i + 1) % n_save == 0:
             sol.append(y1)
 
 
@@ -1364,30 +1426,32 @@ if crank_nicolson:
     y0 = apply_bounds(mesh, y0, **kw)
     y_0 = y0
     yini = y0
-    niter_max = 20
-    tol = 5.0e-2 * T0
+    niter_max = 50   
+    tol = 0.01 * np.max(y0)
     print(f'Crank-Nicolson y : {np.shape(y0)}')
     # Fist estimation of the y1 : euler explicit
     # f = diffusion(yini, D, discr, edge_order, **kw)
-    f = F_diffusion(mesh, yini, D)
-    print(f'Crank-Nicolson f : {np.shape(f)}')
-    y1 = y_0 + dt * f
     for i, ti in enumerate(t[:-1]):
-        # y1 = apply_bounds(y1, discr, **kw)
+        y_0 = apply_bounds(mesh, y_0, **kw)
+        f = F_diffusion(mesh, y_0, D)
+        y1 = y_0 + dt * f
+        y1 = apply_bounds(mesh, y1, **kw)
+        f1 = F_diffusion(mesh, y1, D)
+
+        y_0 = y_0.flatten()
+        f = f.flatten()
         for iter in range(niter_max):
             # new y1 right hand side :
             # y1 = apply_bounds(y1, discr, **kw)
-            y1 = apply_bounds(mesh, y1, **kw)
+            # y1 = apply_bounds(mesh, y1, **kw)
             # f1 = scalar_laplacian(D * y1, discr, edge_order)
             f1 = F_diffusion(mesh, y1, D)
             # Residual's Jacobian :
             # jacobian = np.eye(mesh.nx, M=mesh.ny, dtype=yini.dtype) - (dt / 2.0) * f1
             # print(f'shape(jacobian) {np.shape(jacobian)}')
             # Flattening arrays :
-            # y_0 = y_0.flatten()
-            # f = f.flatten()
-            # y1 = y1.flatten()
-            # f1 = f1.flatten()
+            y1 = y1.flatten()
+            f1 = f1.flatten()
             # print(f'y0 = {y0}')
             # print(f'y1 = {y1}')
             # print(f'f = {f}')
@@ -1395,65 +1459,86 @@ if crank_nicolson:
 
             # Matching residu :
             residual = y1 - y_0 - (dt / 2.0) * (f + f1)
-            residual = residual.flatten()
-            # print(f"residual.shape {residual.shape}")
-
+            residual_norm = np.linalg.norm(residual)
+            if residual_norm < tol:
+                y1 = y1.reshape(yini.shape)
+                print(f'convergence after niter = {iter}')
+                break
             # # Jcobian pseudo-inverse matrix computation :
             # J_T = np.transpose(jacobian)
             # pseudo_inv_J = np.matmul(np.linalg.inv(np.matmul(J_T, jacobian)), J_T)
             # # solving :
             # delta_y = np.dot(pseudo_inv_J, -residual)
 
-            jacobian = (identity(mesh.nx*mesh.ny) - (dt/2.) *
-                        scalar_laplacian_tensor(mesh)).toarray()
+            jacobian = (
+                identity(mesh.nx*mesh.ny) - (dt/2.) *
+                scalar_laplacian_tensor(mesh)
+            ).toarray()
 
             # print(f"jacobian.shape {jacobian.shape}")
 
             # delta_y = spsolve(jacobian, -residual)
-            delta_y = np.dot(np.linalg.inv(jacobian), -residual)
+            # delta_y = np.dot(spinv(jacobian), -residual)
+            # delta_y = np.dot(np.linalg.inv(jacobian), -residual)
+            delta_y = solve(jacobian, -residual, check_finite=True)
 
             if (np.any(np.isnan(delta_y))):
                 print('Nan value detected in delta_y!')
                 break
 
-            delta_y = delta_y.reshape(yini.shape)
-
-            # delta_y = delta_y.flatten()
-            # Incrementing y1 :
-            y_0 = y1
-            f = f1
             y1 += delta_y
-            # Reshape :
-            # y_0 = y_0.reshape(yini.shape)
-            # f = f.reshape(yini.shape)
-            # y1 = y1.reshape(yini.shape)
+
+            residual = y1 - y_0 - (dt / 2.0) * (f + f1)
+
+
+            # delta_y = delta_y.reshape(yini.shape)
+
             # Check for convergence :
-            delta_y_norm = np.linalg.norm(delta_y.flatten())
+            # delta_y_norm = np.linalg.norm(delta_y)
             residual_norm = np.linalg.norm(residual.flatten())
-            if delta_y_norm < tol:
+            if residual_norm < tol:
+                # y_0 = y_0.reshape(yini.shape)
+                # f = f.reshape(yini.shape)
+                y1 = y1.reshape(yini.shape)
+                # f1 = f1.reshape(yini.shape)
                 print(f'convergence after niter = {iter}')
                 break
-            if iter == max(range(niter_max)):
+
+            if iter == (niter_max - 1):
                 print(f'divergence, ||res|| = {residual_norm}')
 
+            y1 = y1.reshape(yini.shape)
+            # Incrementing y1 :
+            # y_0 = y1
+            # y_0 = apply_bounds(mesh, y_0, **kw)
+            # f = F_diffusion(mesh, y_0, D)
+
         # sol[..., i + 1] = y1
-        if (i + 1) % kw['n_save'] == 0:
+        y_0 = y1
+        if (i + 1) % n_save == 0:
             sol.append(y1)
 
 # %%
-postt_2Dmap(
-    mesh,
-    sol[..., 20],
-    'solution 5^th rime step \n',
-    'X',
-    'Y',
-    'Temperature',
-    s=spoints,
-)
+repsave_snapshots = repsave + 'solution_snapshots/'
+if not os.path.exists(repsave_snapshots):
+    os.makedirs(repsave)
+
+# for i,soli in enumerate(sol[::2]):
+for i,soli in enumerate(sol):
+    postt_2Dmap(
+        mesh,
+        soli,
+        f'solution at t = {i*n_save*dt} s \n',
+        'X',
+        'Y',
+        'Temperature',
+        s=spoints,
+        repsave = repsave_snapshots,
+    )
 # %%
 postt_2Dmap(
     mesh,
-    sol[..., -1],
+    sol[-1],
     'final solution \n',
     'X',
     'Y',
@@ -1461,7 +1546,7 @@ postt_2Dmap(
     s=spoints,
 )
 
-Ffinal = F_diffusion(mesh, sol[..., -1], D)
+Ffinal = F_diffusion(mesh, sol[-1], D)
 postt_2Dmap(
     mesh,
     Ffinal,
@@ -1472,7 +1557,7 @@ postt_2Dmap(
     s=spoints,
 )
 
-sl = scalar_laplacian_mesh(mesh, sol[..., -1])
+sl = scalar_laplacian_mesh(mesh, sol[-1])
 postt_2Dmap(
     mesh,
     sl,
