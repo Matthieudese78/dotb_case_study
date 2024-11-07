@@ -10,7 +10,7 @@ import numpy as np
 import yaml
 
 
-class my_dict_ballistic(TypedDict):
+class MyDictBallistic(TypedDict):
     case: str
     solver: str
     save_dir: str
@@ -27,7 +27,7 @@ class my_dict_ballistic(TypedDict):
     c: float
 
 
-class my_dict_rabbit(TypedDict):
+class MyDictRabbit(TypedDict):
     case: str
     solver: str
     save_dir: str
@@ -39,7 +39,7 @@ class my_dict_rabbit(TypedDict):
     b: float
 
 
-class my_dict_diffusion_2D(TypedDict):
+class MyDictDiffusion2D(TypedDict):
     case: str
     solver: str
     save_dir: str
@@ -94,15 +94,15 @@ class my_dict_diffusion_2D(TypedDict):
 
 
 def is_ballistic(d: dict) -> bool:
-    return all(key in d for key in list(my_dict_ballistic.__annotations__.keys()))
+    return all(key in d for key in list(MyDictBallistic.__annotations__.keys()))
 
 
 def is_rabbit(d: dict) -> bool:
-    return all(key in d for key in list(my_dict_rabbit.__annotations__.keys()))
+    return all(key in d for key in list(MyDictRabbit.__annotations__.keys()))
 
 
 def is_diffusion_2D(d: dict) -> bool:
-    return all(key in d for key in list(my_dict_diffusion_2D.__annotations__.keys()))
+    return all(key in d for key in list(MyDictDiffusion2D.__annotations__.keys()))
 
 
 def check_type(d: dict) -> str:
@@ -115,10 +115,6 @@ def check_type(d: dict) -> str:
     print('Input data error : check your input types.')
     sys.exit()
     return 'Unknown type'
-
-
-# my_dict : type being either one of the three possible TypedDict :
-my_dict = my_dict_ballistic | my_dict_rabbit | my_dict_diffusion_2D
 
 
 def get_config_file(default_config_path, default_input) -> str:
@@ -159,6 +155,8 @@ def get_config_file(default_config_path, default_input) -> str:
     return config_path
 
 
+# my_dict : type being either one of the three possible TypedDict :
+my_dict = MyDictBallistic | MyDictRabbit | MyDictDiffusion2D
 # turns the entries of a config.yaml file into a dict :
 
 
