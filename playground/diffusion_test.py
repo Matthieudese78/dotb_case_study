@@ -22,7 +22,7 @@ def postt_2Dmap(x, y, data, title, labelx, labely, labelbar):
         Y.ravel(),
         c=data.ravel(),
         cmap='inferno',
-        s=100,
+        s=200,
     )
 
     # Set limits and aspect ratio
@@ -226,7 +226,7 @@ def boundary_conditions_2D(x, y, data, **kw):
         return [arr_left, arr_bottom, arr_right, arr_top]
 
 
-def diffusion(data, D, discr, edge_order=1, **kw) -> np.ndarray:
+def diffusion(x, y, data, D, discr, edge_order=1, **kw) -> np.ndarray:
     # 1D :
     if len(np.shape(data)) == 1:
         if kw['dirichlet']:
@@ -359,11 +359,12 @@ def apply_bounds(data, discr, **kw) -> np.ndarray:
 
 # %% Set up the problem
 # t = np.linspace(0., 1.0, 1000)
-t = np.linspace(0.0, 1.0, 1000)
-
+t_end = 1.
 # Physics :
 # rabibts : 5 litters annualy of 10 kits each :
 # discretization : dx, dy in km
+# nx = 100
+# ny = 100
 nx = 100
 ny = 100
 lx = 1.0
@@ -371,11 +372,14 @@ ly = 1.0
 # x = np.linspace(0.0, lx, nx)
 # y = np.linspace(0.0, ly, ny)
 x = np.linspace(-lx / 2.0, lx / 2.0, nx)
-y = np.linspace(-lx / 2.0, ly / 2.0, ny)
+y = np.linspace(-ly / 2.0, ly / 2.0, ny)
 # mesh = np.array([(xi,yj) for ])
 dx = x[1] - x[0]
 dy = y[1] - y[0]
 discr = [dx, dy]
+
+n_t = int((10.*t_end)/np.min(discr))
+t = np.linspace(0., t_end, n_t)
 # intial solution :
 T0 = 20.0
 # y0 = np.random.randint(2.0, 40.0, size=(nx, ny)).astype(float)
@@ -403,11 +407,11 @@ postt_2Dmap(
 kw_dirichlet = {
     'neumann': False,
     'dirichlet': True,
-    'interpolation_coeff': 0.2,
-    'right_boundary': 0.5 * T0,
+    'interpolation_coeff': 0.,
+    'right_boundary': 1.5 * T0,
     'left_boundary': 0.5 * T0,
-    'bottom_boundary': 0.2 * T0,
-    'top_boundary': 0.7 * T0,
+    'bottom_boundary': 0.3 * T0,
+    'top_boundary': 1.7 * T0,
 }
 kw_neumann = {
     'neumann': True,
@@ -418,7 +422,8 @@ kw_neumann = {
     'bottom_boundary': 0.0,
     'top_boundary': 0.0,
 }
-dirichlet = False
+dirichlet = True
+# neumann =  True
 
 if dirichlet:
     neumann = False
@@ -521,10 +526,10 @@ postt_2Dmap(x, y, SL_y0, 'Scalar Laplacian \n', 'X', 'Y', 'Scalar Laplacian')
 
 # %% diffusion coefficient map :
 D0 = 0.01
-# D = D0 * np.ones((nx, ny))
+D = D0 * np.ones((nx, ny))
 # D = np.random.uniform(D0, 10.*D0, size=(nx, ny))
 # D = D0 * np.array([[1. + (xi / lx) for xi in x] for yi in y])
-D = D0 * np.array([[1.0 + (xi / lx) * (yi / ly) for xi in x] for yi in y])
+# D = D0 * (np.array([[1.0 + (xi / lx) * (yi / ly) for xi in x] for yi in y]))
 # D = (D0/T0) * y0
 
 print(type(D))
@@ -535,6 +540,13 @@ print(type(D * y0))
 print(np.shape(D * y0))
 
 print(f'diffusion max value = {np.max(D)}')
+
+#%% CFL criteria :
+# np.max(D) * dt / (np.min(dx,dy))**2 <= 1./2.
+val_D_max = D[np.unravel_index(np.argmax(D, axis=None), D.shape)]
+dt =  0.1 * 0.5 * ((np.min([dx,dy]))**2) / val_D_max
+n_t = int(t_end / dt) + 1
+t = np.linspace(0.,t_end,n_t)
 # %% Plot D : diffusion coeff
 postt_2Dmap(
     x,
@@ -562,7 +574,7 @@ postt_2Dmap(x, y, grady, 'y=gradient \n', 'X', 'Y', 'y-gradient')
 postt_2Dmap(x, y, div, 'Divergence \n', 'X', 'Y', 'Divergence')
 
 # %% Second member : initial values
-Fini = diffusion(y0, D0, discr, edge_order=1, **kw)
+Fini = diffusion(x, y, y0, D0, discr, edge_order=1, **kw)
 postt_2Dmap(x, y, Fini, 'F ini \n', 'X', 'Y', 'Second member ini')
 
 # %% solver :
@@ -577,11 +589,11 @@ sol[..., 0] = y0
 
 print(type(sol[..., 0]))
 print(np.shape(sol[..., 0]))
-euler_explicit = False
-crank_nicolson = True
+euler_explicit = True
+crank_nicolson = False
 if euler_explicit:
     for i, ti in enumerate(t[:-1]):
-        F = diffusion(sol[..., i], D, discr, edge_order, **kw)
+        F = diffusion(x, y, sol[..., i], D, discr, edge_order, **kw)
         # F[:,0] = -F[:,1]
         # F[0,:] = -F[1,:]
         # F[-1,:] = -F[-2,:]
@@ -594,25 +606,28 @@ if euler_explicit:
 
 if crank_nicolson:
     y0 = apply_bounds(y0, discr, **kw)
+    y_0 = y0
     yini = y0
-    niter_max = 10
-    tol = 1.0e-1 * T0
+    niter_max = 20
+    tol = 5.0e-2 * T0
     print(f'Crank-Nicolson y : {np.shape(y0)}')
     # Fist estimation of the y1 : euler explicit
     f = diffusion(yini, D, discr, edge_order, **kw)
     print(f'Crank-Nicolson f : {np.shape(f)}')
-    y1 = yini + dt * f
+    y1 = y_0 + dt * f
 
     for i, ti in enumerate(t[:-1]):
+        # y1 = apply_bounds(y1, discr, **kw)
         for iter in range(niter_max):
             # new y1 right hand side :
             y1 = apply_bounds(y1, discr, **kw)
-            f1 = scalar_laplacian(D * y1, discr, edge_order)
+            # f1 = scalar_laplacian(D * y1, discr, edge_order)
+            f1 = diffusion(y1, D, discr, edge_order, **kw)
             # Residual's Jacobian :
             jacobian = np.eye(nx, M=ny, dtype=yini.dtype) - (dt / 2.0) * f1
             # print(f'shape(jacobian) {np.shape(jacobian)}')
             # Flattening arrays :
-            y0 = y0.flatten()
+            y_0 = y_0.flatten()
             f = f.flatten()
             y1 = y1.flatten()
             f1 = f1.flatten()
@@ -621,7 +636,7 @@ if crank_nicolson:
             # print(f'f = {f}')
             # print(f'f1 = {f1}')
             # Matching residu :
-            residual = y1 - y0 - (dt / 2.0) * (f + f1)
+            residual = y1 - y_0 - (dt / 2.0) * (f + f1)
             # print(f'residual shape = {residual.shape}')
             # solving :
             # delta_y = spsolve(jacobian, -residual)
@@ -631,11 +646,11 @@ if crank_nicolson:
             )
             delta_y = delta_y.flatten()
             # Incrementing y1 :
-            y0 = y1
+            y_0 = y1
             f = f1
             y1 += delta_y
             # Reshape :
-            y0 = y0.reshape(yini.shape)
+            y_0 = y_0.reshape(yini.shape)
             f = f.reshape(yini.shape)
             y1 = y1.reshape(yini.shape)
             # Check for convergence :
@@ -643,6 +658,8 @@ if crank_nicolson:
             if residual_norm < tol:
                 print('convergence')
                 break
+            if iter == max(range(niter_max)): 
+                print(f'divergence, ||res|| = {residual_norm}')
 
         sol[..., i + 1] = y1
 
