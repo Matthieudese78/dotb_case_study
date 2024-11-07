@@ -4,7 +4,8 @@
 # - diffusion
 case: "ballistic"
 # Solver :
-solver: "euler_explicit"
+# solver: "euler_explicit"
+solver: "adams_bashforth"
 # Saving results directory :
 save_dir: "/home/matthieu/Documents/dotblocks/dotb_case_study/results/ballistic/"
 # Calculus duration :
