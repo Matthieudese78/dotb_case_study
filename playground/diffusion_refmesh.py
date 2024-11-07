@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # %%
 from __future__ import annotations
+
 import os
 
 import matplotlib.cm as mplcm
@@ -8,24 +9,26 @@ import matplotlib.colors as mplcolors
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import gridspec
+from scipy.linalg import solve
 from scipy.sparse import diags
 from scipy.sparse import identity
 from scipy.sparse import kron
+
+from dotb.refined_mesh_class import Mesh
 # from scipy.sparse import lil_matrix
 # from scipy.sparse.linalg import inv as spinv
 # from scipy.sparse.linalg import spsolve
-from scipy.linalg import solve 
-
-from dotb.refined_mesh_class import Mesh
 
 
 # from scipy.sparse import diags, identity
 
-#%%
+# %%
 repsave = '/home/matthieu/Documents/dotblocks/dotb_case_study/playground/results/diffusion_refmesh/'
 if not os.path.exists(repsave):
     os.makedirs(repsave)
-#%%
+# %%
+
+
 def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
     new_cmap = mplcolors.LinearSegmentedColormap.from_list(
         f'trunc({cmap.name},{minval:.2f},{maxval:.2f})',
@@ -38,7 +41,7 @@ def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
 cmapinf = truncate_colormap(mplcm.inferno, 0.0, 0.9, n=100)
 
 
-def postt_2Dmap(mesh: Mesh, data, title, labelx, labely, labelbar, s=5,repsave=repsave):
+def postt_2Dmap(mesh: Mesh, data, title, labelx, labely, labelbar, s=5, repsave=repsave):
     # Create meshgrid for plotting
     X = mesh.X
     Y = mesh.Y
@@ -663,7 +666,7 @@ def apply_bounds(mesh: Mesh, data: np.ndarray, **kw) -> np.ndarray:
 # x_refine_percent = 20.0
 # y_refine_percent = 20.0
 
-#### Works for Crank Nicolson with D = 1.e-2 !!
+# Works for Crank Nicolson with D = 1.e-2 !!
 # # time :
 # t_end = 1.0
 # # mesh :
@@ -676,7 +679,7 @@ def apply_bounds(mesh: Mesh, data: np.ndarray, **kw) -> np.ndarray:
 # x_refine_percent = 10.
 # y_refine_percent = 10.
 
-#### Works for Crank Nicolson with D = 1.e-2 & uniform dirichlet boundaries = 21 degrees !!
+# Works for Crank Nicolson with D = 1.e-2 & uniform dirichlet boundaries = 21 degrees !!
 # # time :
 # t_end = 2.0
 # # mesh :
@@ -689,7 +692,8 @@ def apply_bounds(mesh: Mesh, data: np.ndarray, **kw) -> np.ndarray:
 # x_refine_percent = 5.
 # y_refine_percent = 5.
 
-#### Works for Crank Nicolson with D = 1.e-2 & uniform dirichlet boundaries = 22 degrees !!
+
+# Works for Crank Nicolson with D = 1.e-2 & uniform dirichlet boundaries = 22 degrees !!
 # time :
 t_end = 10.0
 # mesh :
@@ -1283,7 +1287,7 @@ plt.savefig(repsave+title+'.png')
 plt.close('all')
 
 # print(f'len(contour) = {len(contour_test)}')
-#%% print(f'len(interpolated array) = {len(arr_test)}')
+# %% print(f'len(interpolated array) = {len(arr_test)}')
 plt.scatter(contour_test, arr_test, s=4)
 title = 'Concatenated interpolated array'
 plt.savefig(repsave+title+'.png')
@@ -1296,10 +1300,11 @@ D0 = 1.e-2
 # D0 = 1.0e-2
 # uniform
 #  = D0 * np.ones((nx, ny))
-D = D0 * np.ones_like(mesh.X)
+# D = D0 * np.ones_like(mesh.X)
 # D = np.random.uniform(D0, 10.*D0, size=(nx, ny))
 # D = D0 * np.array([[1. + (xi / lx) for xi in x] for yi in y])
 # D = D0 * (np.array([[1.0 + (xi / lx) * (yi / ly) for xi in x] for yi in y]))
+D = D0 * (1. + (mesh.X/mesh.lx) * (mesh.Y/mesh.ly))
 # D = (D0/T0) * y0
 
 # print(type(D))
@@ -1426,7 +1431,7 @@ if crank_nicolson:
     y0 = apply_bounds(mesh, y0, **kw)
     y_0 = y0
     yini = y0
-    niter_max = 50   
+    niter_max = 50
     tol = 0.01 * np.max(y0)
     print(f'Crank-Nicolson y : {np.shape(y0)}')
     # Fist estimation of the y1 : euler explicit
@@ -1490,7 +1495,6 @@ if crank_nicolson:
 
             residual = y1 - y_0 - (dt / 2.0) * (f + f1)
 
-
             # delta_y = delta_y.reshape(yini.shape)
 
             # Check for convergence :
@@ -1523,8 +1527,8 @@ repsave_snapshots = repsave + 'solution_snapshots/'
 if not os.path.exists(repsave_snapshots):
     os.makedirs(repsave)
 
-# for i,soli in enumerate(sol[::2]):
-for i,soli in enumerate(sol):
+# %% for i,soli in enumerate(sol[::2]):
+for i, soli in enumerate(sol):
     postt_2Dmap(
         mesh,
         soli,
@@ -1533,7 +1537,7 @@ for i,soli in enumerate(sol):
         'Y',
         'Temperature',
         s=spoints,
-        repsave = repsave_snapshots,
+        repsave=repsave_snapshots,
     )
 # %%
 postt_2Dmap(
