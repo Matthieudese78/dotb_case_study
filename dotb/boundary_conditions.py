@@ -6,7 +6,7 @@ import numpy as np
 # %%
 
 
-def boundary_conds(data, **kw) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def boundary_conds(data: np.ndarray, **kw) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
 
     """

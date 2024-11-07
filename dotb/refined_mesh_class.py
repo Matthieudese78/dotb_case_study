@@ -109,9 +109,9 @@ class Mesh:
         y = np.concatenate(
             (y_fine[iy_fine_bottom], y_coarse[iy_middle], y_fine[iy_fine_top]),
         )
-        print(f'ix_fine_right : {ix_fine_right}')
-        print(f'ix_fine_left : {ix_fine_left}')
-        print(f'ix_middle : {ix_middle}')
+        # print(f'ix_fine_right : {ix_fine_right}')
+        # print(f'ix_fine_left : {ix_fine_left}')
+        # print(f'ix_middle : {ix_middle}')
         # non refined :
         # x = np.linspace(-self.lx/2.,self.lx/2.,int(self.lx/self.dx_fine)+1)
         # y = np.linspace(-self.ly/2.,self.ly/2.,int(self.ly/self.dy_fine)+1)
