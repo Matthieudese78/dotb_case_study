@@ -16,8 +16,8 @@ class Mesh:
         dy_fine,
         dx_coarse,
         dy_coarse,
-        x_refine_percent=10,
-        y_refine_percent=10,
+        x_refine_percent=10.,
+        y_refine_percent=10.,
     ):
         self.lx = lx
         self.ly = ly
@@ -109,6 +109,9 @@ class Mesh:
         y = np.concatenate(
             (y_fine[iy_fine_bottom], y_coarse[iy_middle], y_fine[iy_fine_top]),
         )
+        print(f'ix_fine_right : {ix_fine_right}')
+        print(f'ix_fine_left : {ix_fine_left}')
+        print(f'ix_middle : {ix_middle}')
         # non refined :
         # x = np.linspace(-self.lx/2.,self.lx/2.,int(self.lx/self.dx_fine)+1)
         # y = np.linspace(-self.ly/2.,self.ly/2.,int(self.ly/self.dy_fine)+1)
@@ -196,6 +199,10 @@ class Mesh:
         self.delta_y_minus = delta_y_minus[:, :-1]
         self.delta_y_plus = delta_y_plus[:, 1:]
 
+        # np.round(self.delta_x_minus, int(np.abs(np.log10(np.min(self.delta_x_minus)))) + 1)
+        # np.round(self.delta_x_plus, int(np.abs(np.log10(np.min(self.delta_x_plus)))) + 1)
+        # np.round(self.delta_y_minus, int(np.abs(np.log10(np.min(self.delta_y_minus)))) + 1)
+        # np.round(self.delta_y_plus, int(np.abs(np.log10(np.min(self.delta_y_plus)))) + 1)
     def visualize(self):
         plt.figure(figsize=(10, 10))
 
@@ -217,10 +224,12 @@ if __name__ == '__main__':
     # Example usage
     lx = 1.0
     ly = 1.0
-    dx_fine = 0.01
-    dy_fine = 0.01
-    dx_coarse = 5.0 * dx_fine
-    dy_coarse = 5.0 * dy_fine
+    dx_fine = 0.1
+    dy_fine = 0.1
+    dx_coarse = 2. * dx_fine
+    dy_coarse = 2. * dy_fine
+    x_refine_percent = 20.
+    y_refine_percent = 20.
 
     mesh = Mesh(
         lx=lx,
@@ -229,8 +238,8 @@ if __name__ == '__main__':
         dy_fine=dy_fine,
         dx_coarse=dx_coarse,
         dy_coarse=dy_coarse,
-        x_refine_percent=2,
-        y_refine_percent=2,
+        x_refine_percent=x_refine_percent,
+        y_refine_percent=x_refine_percent,
     )
 
     mesh.visualize()
