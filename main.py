@@ -53,7 +53,8 @@ def main():
     print(f'type y_0 = {type(y)}')
     print(f'outupt type {type(init.intiate_y(config))}')
 
-    # Solver :
+    # Solver : on laisse en fonctionnel :
+
     if config['solver'] == 'euler_explicit':
         sol = solver.euler_explicit(y, t, **config)
     if config['solver'] == 'adams_bashforth':
@@ -72,5 +73,6 @@ def main():
 # %% direct execution :
 if __name__ == '__main__':
     main()
+
 else:
     print('This script was imported')
