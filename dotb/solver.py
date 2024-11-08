@@ -78,6 +78,43 @@ class AdamsBashforth:
         return np.array(sol)
 
 
+class CrankNicolson:
+    def __init__(self, y0, t, rhs, **kw):
+        self.t = t
+        self.dt = t[1] - t[0]
+        self.y0 = y0
+        self.rhs = rhs
+        self.n_save = kw['n_save']
+        self.n_iter_max = kw['n_iter_max']
+        self.tol = kw['tol']
+
+    def solve(self, **kw):
+        sol = []
+        sol.append(self.y0)
+        y = self.rhs.bcond(self.y0)
+        for i, ti in enumerate(self.t[:-2]):
+            # Apply possible BC to y0
+            y = self.rhs.bcond(y)
+            # Matching right hand side :
+            f = self.rhs.dydt(y)
+            # Initialization with euler explicit :
+            y1 = y + self.dt * f
+            # Apply possible BC to y0
+            y1 = self.rhs.bcond(y1)
+            # # Matching right hand side :
+            # f1 = self.rhs.dydt(y1)
+            # Iterative Newton-Raphson :
+            self.rhs.newton_raphson(
+                y, y1, f, self.dt, self.n_iter_max, self.tol,
+            )
+            # iteration :
+            if (i + 1) % self.n_save == 0:
+                # print(f'saving {i}^th time step')
+                sol.append(y)
+            y = y1
+        return np.array(sol)
+
+
 def euler_explicit(y: np.ndarray, t: np.ndarray, **kw) -> np.ndarray:
     """
     Solve ∂y/∂t = F(x,y,y') using Euler explicit method
@@ -205,38 +242,5 @@ def crank_nicolson(y: np.ndarray, t: np.ndarray, **kw) -> np.ndarray:
             # print(f'solver : sol = {sol}')
         y = y1
     return np.array(sol)
-
-
-def newton_raphson_diffusion(y, dt, res, crit, nmax=100, **kw):
-    print('Newton Raphson')
-    res_norm = np.sqrt(np.sum(res**2))
-    y_norm = np.sqrt(np.sum(y**2))
-    f = second.F(y, **kw)
-    i = 0
-    # First estimation of the residu value :
-    dres = res / res_norm
-    while res_norm > crit:
-        i += 1
-        y1 = y - np.matmul(LA.inv(dres), res)
-        y1 = BC.apply_boundaries(mesh, y1, **kw)[0]
-        f1 = second.F(y1, **kw)
-        # new residu computation :
-        res1 = y1 - y - (dt/2.)*(f1 + f)
-        res_norm = np.sqrt(np.sum(res**2))
-        print(f'res norm = {res_norm}')
-        # converged ?
-        if res_norm < crit:
-            return y1
-        # time derivative of the residu function :
-        dres = (res1 - res) / res_norm
-        # max number of iteration reached ?
-        if i >= nmax:
-            print('Error : Newton Raphson divergence!')
-            print('        Max nb of iterations reached')
-            return y1
-        # other wise next Newton Raphson iteration :
-        y = y1
-        f = f1
-        res = res1
 
 # %%
