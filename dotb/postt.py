@@ -632,7 +632,7 @@ def postt_2Dmap_limits(
         mesh.Y.ravel(),
         c=data.ravel(),
         cmap='inferno',
-        s=15,
+        s=18,
     )
 
     # Set limits and aspect ratio
