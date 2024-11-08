@@ -10,6 +10,8 @@ from matplotlib import gridspec
 from PIL import Image
 
 import dotb.second_member as second
+from dotb.boundary_conditions import boundary_conditions_mesh
+from dotb.refined_mesh_class import Mesh
 
 
 def postt_1D(t, x, sol):
@@ -308,9 +310,25 @@ def postt_diffusion_2D(t, sol, **kw):
     create_gif_from_png_files(input_dir, output_dir_gifs, output_file)
 
 
-def postt_2Dmap(x, y, data, title, save_name, dirsave, labelx, labely, labelbar, **kw):
+def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
+    new_cmap = mplcolors.LinearSegmentedColormap.from_list(
+        f'trunc({cmap.name},{minval:.2f},{maxval:.2f})',
+        cmap(np.linspace(minval, maxval, n)),
+    )
+    return new_cmap
+
+
+# truncated inferno values :
+cmapinf = truncate_colormap(mplcm.inferno, 0.0, 0.9, n=100)
+
+
+def postt_2Dmap(mesh: Mesh, data, title: str, labelx: str, labely: str, labelbar: str, save_dir: str = '', save_name: str = '', s: int | float = 10):
+    """
+    Plots a 2D value array over a 2D grid.
+    """
     # Create meshgrid for plotting
-    X, Y = np.meshgrid(x, y)
+    X = mesh.X
+    Y = mesh.Y
 
     # Create figure and axis
     fig, ax = plt.subplots(figsize=(10, 8))
@@ -319,15 +337,15 @@ def postt_2Dmap(x, y, data, title, save_name, dirsave, labelx, labely, labelbar,
     scatter = ax.scatter(
         X.ravel(),
         Y.ravel(),
-        c=data.ravel(),
-        cmap='inferno',
-        s=100,
+        c=data,
+        cmap=cmapinf,
+        s=s,
     )
 
     # Set limits and aspect ratio
-    ax.set_xlim(x[0], x[-1])
-    ax.set_ylim(y[0], y[-1])
-    ax.set_aspect('equal')
+    ax.set_xlim(np.min(X), np.max(X))
+    ax.set_xlim(np.min(Y), np.max(Y))
+    # ax.set_aspect("equal")
 
     ax.set_xlabel(f'{labelx}')
     ax.set_ylabel(f'{labely}')
@@ -336,14 +354,46 @@ def postt_2Dmap(x, y, data, title, save_name, dirsave, labelx, labely, labelbar,
     cbar = fig.colorbar(scatter, ax=ax)
     cbar.ax.set_ylabel(f'{labelbar}')
 
-    plt.title(title)
-    plt.savefig(dirsave + save_name + '.png')
+    plt.title(f'{title}')
     # plt.show()
+    plt.savefig(save_dir + save_name + '.png')
     plt.close('all')
 
 
+def plot_boundary_conditions(mesh: Mesh, save_dir: str = '', save_name: str = '', **kw):
+    boundaries = boundary_conditions_mesh(mesh, **kw)
+    arr_test = np.concatenate(
+        (
+            np.flip(boundaries[0]),
+            boundaries[1],
+            boundaries[2],
+            np.flip(boundaries[3]),
+        ),
+    )
+    xleft = np.linspace(0.0, mesh.ly, len(mesh.Y[0, :]))
+    xbottom = np.linspace(mesh.ly, mesh.ly + mesh.lx, len(mesh.X[:, 0]))
+    xright = np.linspace(
+        mesh.ly + mesh.lx,
+        2.0 * mesh.ly + mesh.lx,
+        len(mesh.Y[-1, :]),
+    )
+    xtop = np.linspace(
+        2.0 * mesh.ly + mesh.lx,
+        2.0 * mesh.ly + 2.0 * mesh.lx,
+        len(mesh.X[:, -1]),
+    )
+
+    contour_test = np.concatenate((xleft, xbottom, xright, xtop))
+
+    plt.scatter(contour_test, arr_test, s=4)
+    plt.title('Concatenated interpolated array')
+    plt.savefig(save_dir+save_name+'.png')
+    plt.close('all')
+    return
+
+
 def postt_2Dmap_limits(
-    x, y, data, title, save_name, dirsave, labelx, labely, labelbar, limitbar=[], **kw,
+    x, y, data, title, save_name, dirsave, labelx, labely, labelbar, limitbar=[],
 ):
     X, Y = np.meshgrid(x, y)
     f = plt.figure(figsize=(8, 6))
