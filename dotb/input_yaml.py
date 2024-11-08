@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import argparse
 import os
-import sys
 from typing import TypedDict
 
 import numpy as np
@@ -120,6 +119,21 @@ def check_type(d: dict) -> str:
     if is_diffusion_2D(d):
         return 'Diffusion2D'
     raise KeyError('Some inputs are missing in your input_file.yaml')
+
+
+def check_time_step(d: dict) -> str:
+    if d['case'] == 'diffusion_2D':
+        discr_min = np.min([
+            np.min(d['mesh'].delta_x_minus),
+            np.min(d['mesh'].delta_y_minus),
+        ])
+        D_max = np.max(d['D'])
+        if d['dt'] > (discr_min/(2.*D_max)):
+            raise ValueError(
+                'Time step is to big. \n Please respect the CFL criterium : \n dt <= min(delta_x,delta_y)**2 / (2 * max(D) ) ',
+            )
+
+    return 'time step size seems OK'
 
 
 def get_config_file(default_config_path, default_input) -> str:
