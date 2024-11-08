@@ -663,6 +663,7 @@ def postt_2Dmap_limits(
     f.savefig(dirsave + save_name + '.png')
     plt.close('all')
 
+
 def create_gif_from_png_files(
     input_directory, output_directory, output_file, duration=5000,
 ):
