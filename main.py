@@ -21,7 +21,7 @@ from dotb.second_member import Rabbit
 solver_map = {
     'euler_explicit': solver.EulerExplicit,
     'adams_bashforth': solver.AdamsBashforth,
-    # 'crank_nicolson': CrankNicolson
+    'crank_nicolson': solver.CrankNicolson,
 }
 
 rhs_map = {
@@ -77,6 +77,10 @@ def main():
     y, t, config = init.intiate_y(config)
     #       ... then re-checked :
     input.check_type(config)
+
+    # Check time step value (diffusion only : CFL) to avoid divergence :
+    print(f"mesh shape : {config['mesh'].X.shape}")
+    input.check_time_step(config)
 
     # k1 = {k: config.get(k) for k in [
     #     'dirichlet','neumann','left_boundary','bottom_boundary','right_boundary','top_boundary','interpolation_coeff',
