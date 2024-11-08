@@ -6,11 +6,11 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-import dotb.boundary_conditions as BC
 import dotb.differential_operators as diffops
 import dotb.postt as postt
 import dotb.second_member as second
 from dotb.refined_mesh_class import Mesh
+# import dotb.boundary_conditions as BC
 # from dotb.second_member import Diffusion
 
 # For input testing plots :
@@ -108,8 +108,12 @@ def intiate_y(kw: dict) -> tuple:
             kw['bottom_boundary'] = kw['neumann_bottom_boundary']
             kw['top_boundary'] = kw['neumann_top_boundary']
 
-        k1 = {k: kw.get(k) for k in ['dirichlet', 'neumann', 'left_boundary',
-                                     'bottom_boundary', 'right_boundary', 'top_boundary', 'interpolation_coeff']}
+        k1 = {
+            k: kw.get(k) for k in [
+                'dirichlet', 'neumann', 'left_boundary',
+                'bottom_boundary', 'right_boundary', 'top_boundary', 'interpolation_coeff',
+            ]
+        }
         print(k1)
         # Applying the boundary conditions to y_0 :
         # y_0 = BC.apply_boundaries(mesh, y_0, **kw)
