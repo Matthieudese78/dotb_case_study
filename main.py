@@ -39,14 +39,11 @@ def main():
     print(f"Solving the {config['case']} case")
     print(f"using the {config['solver']} solver")
 
-    # time vector :
-    t = np.linspace(0, config['t_end'], config['n_t'])
-
     # y-initialization :
     #   n-dimensional tensor field y(t=0) from config :
     #   some values in config dict are computed in initiate_y
     #   --> config dict is therefore reloaded.
-    y, config = init.intiate_y(config)
+    y, t, config = init.intiate_y(config)
     #       ... then re-checked :
     input.check_type(config)
 
