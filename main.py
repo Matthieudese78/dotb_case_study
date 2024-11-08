@@ -55,8 +55,8 @@ def main():
     maindir = os.path.dirname(__file__)
     # default .yaml file name :
     # default_input = 'ballistic_default_input.yaml'
-    default_input = 'rabbit_default_input.yaml'
-    # default_input = 'diffusion_2D_default_input.yaml'
+    # default_input = 'rabbit_default_input.yaml'
+    default_input = 'diffusion_2D_default_input.yaml'
     # Reading argument :
     # arg parsing for inputs :
     config_file_path = input.get_config_file(maindir, default_input)
