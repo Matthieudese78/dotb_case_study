@@ -827,41 +827,42 @@ plt.close('all')
 
 
 # %%
-def scalar_laplacian_tensor_uniform(mesh: Mesh):
-    # Uniform mesh :
-    Lx = diags(
-        [1, -2, 1], [-1, 0, 1],
-        shape=(mesh.nx, mesh.nx),
-    ) / mesh.dx_fine**2
-    Ly = diags(
-        [1, -2, 1], [-1, 0, 1],
-        shape=(mesh.ny, mesh.ny),
-    ) / mesh.dy_fine**2
+# Old ChatGpt response :
+# def scalar_laplacian_tensor_uniform(mesh: Mesh):
+#     # Uniform mesh :
+#     Lx = diags(
+#         [1, -2, 1], [-1, 0, 1],
+#         shape=(mesh.nx, mesh.nx),
+#     ) / mesh.dx_fine**2
+#     Ly = diags(
+#         [1, -2, 1], [-1, 0, 1],
+#         shape=(mesh.ny, mesh.ny),
+#     ) / mesh.dy_fine**2
 
-    # Convert to LIL format to allow for easy modification at boundary points
-    Lx = Lx.tolil()
-    Ly = Ly.tolil()
+#     # Convert to LIL format to allow for easy modification at boundary points
+#     Lx = Lx.tolil()
+#     Ly = Ly.tolil()
 
-    # todo backward an forward difference method
-    Lx[0, 0] = -1 / dx**2  # Forward difference at the left boundary
-    Lx[0, 1] = 1 / dx**2
-    Lx[-1, -1] = -1 / dx**2  # Backward difference at the right boundary
-    Lx[-1, -2] = 1 / dx**2
+#     # todo backward an forward difference method
+#     Lx[0, 0] = -1 / dx**2  # Forward difference at the left boundary
+#     Lx[0, 1] = 1 / dx**2
+#     Lx[-1, -1] = -1 / dx**2  # Backward difference at the right boundary
+#     Lx[-1, -2] = 1 / dx**2
 
-    # Apply Neumann boundary conditions on the top and bottom edges of Ly
-    Ly[0, 0] = -1 / dy**2  # Forward difference at the bottom boundary
-    Ly[0, 1] = 1 / dy**2
-    Ly[-1, -1] = -1 / dy**2  # Backward difference at the top boundary
-    Ly[-1, -2] = 1 / dy**2
+#     # Apply Neumann boundary conditions on the top and bottom edges of Ly
+#     Ly[0, 0] = -1 / dy**2  # Forward difference at the bottom boundary
+#     Ly[0, 1] = 1 / dy**2
+#     Ly[-1, -1] = -1 / dy**2  # Backward difference at the top boundary
+#     Ly[-1, -2] = 1 / dy**2
 
-    # Construct the 2D Laplacian operator using Kronecker products
-    Ix = identity(mesh.nx)
-    Iy = identity(mesh.ny)
+#     # Construct the 2D Laplacian operator using Kronecker products
+#     Ix = identity(mesh.nx)
+#     Iy = identity(mesh.ny)
 
-    return kron(Iy, Lx) + kron(Ly, Ix)
+#     return kron(Iy, Lx) + kron(Ly, Ix)
 
 
-sl_mesh = scalar_laplacian_tensor_uniform(mesh)
+# sl_mesh = scalar_laplacian_tensor_uniform(mesh)
 # print(type(sl_mesh))
 # print(sl_mesh.shape)
 
@@ -1105,7 +1106,7 @@ wy = 2.0 * np.pi / ly
 #         ] for yi in mesh.Y
 #     ])
 # )
-y0 = T0 * (1.0 + np.sin(wx * mesh.X) * np.sin(wx * mesh.Y))
+y0 = T0 * (1.0 + np.sin(wx * mesh.X) * np.sin(wy * mesh.Y))
 
 spoints = 23
 postt_2Dmap(
@@ -1159,16 +1160,16 @@ postt_2Dmap(
 )
 
 # %%
-sl_y0 = sl_mesh @ y0.flatten()
-postt_2Dmap(
-    mesh,
-    sl_y0,
-    'Scalar Laplacian of T(t=0) \n',
-    'X',
-    'Y',
-    'Initial Temperature scalar laplacian',
-    s=spoints,
-)
+# sl_y0 = sl_mesh @ y0.flatten()
+# postt_2Dmap(
+#     mesh,
+#     sl_y0,
+#     'Scalar Laplacian of T(t=0) \n',
+#     'X',
+#     'Y',
+#     'Initial Temperature scalar laplacian',
+#     s=spoints,
+# )
 
 # grad_x_y0_int = (grad_tensor @ (y0[1:-1,1:-1].flatten()))
 grad_x_y0_int = (grad_tensor_x @ (y0.flatten()))
