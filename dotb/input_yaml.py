@@ -15,7 +15,7 @@ class MyDictBallistic(TypedDict):
     solver: str
     save_dir: str
     t_end: float
-    n_t: int
+    dt: float
     n_save: int
     x_0: float
     y_0: float
@@ -44,17 +44,20 @@ class MyDictDiffusion2D(TypedDict):
     solver: str
     save_dir: str
     t_end: float
-    n_t: int
+    dt: float
     n_save: int
 
     l_x: float
     l_y: float
 
-    n_x: int
-    n_y: int
+    dx_fine: float
+    dy_fine: float
 
-    dx: float
-    dy: float
+    dx_coarse: float
+    dy_coarse: float
+
+    x_refine_percent: float
+    y_refine_percent: float
 
     T_0: float
 
@@ -112,9 +115,7 @@ def check_type(d: dict) -> str:
         return 'Rabbit'
     if is_diffusion_2D(d):
         return 'Diffusion2D'
-    print('Input data error : check your input types.')
-    sys.exit()
-    return 'Unknown type'
+    raise KeyError('Some inputs are missing in your input_file.yaml')
 
 
 def get_config_file(default_config_path, default_input) -> str:

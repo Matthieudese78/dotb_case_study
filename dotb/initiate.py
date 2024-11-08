@@ -7,8 +7,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import dotb.boundary_conditions as BC
+import dotb.differential_operators as diffops
 import dotb.postt as postt
 import dotb.second_member as second
+from dotb.refined_mesh_class import Mesh
 
 # For input testing plots :
 
@@ -36,6 +38,8 @@ def intiate_y(kw: dict) -> tuple:
     """
 
     if kw['case'] == 'ballistic':
+        # time array :
+        t = np.linspace(0, kw['t_end'], kw['n_t'])
         # Reading args :
         x0 = kw['x_0']
         y0 = kw['y_0']
@@ -44,42 +48,42 @@ def intiate_y(kw: dict) -> tuple:
         y_0 = np.array([x0, y0, dxdt0, dydt0])
 
     if kw['case'] == 'rabbit':
+        # time array :
+        t = np.linspace(0, kw['t_end'], kw['n_t'])
         # Reading args :
         y_0 = np.array([kw['N_0']])
 
     if kw['case'] == 'diffusion_2D':
-        # Computation of the initial temperature field :
-        x = np.linspace(-kw['l_x'] / 2.0, kw['l_x'] / 2.0, kw['n_x'])
-        y = np.linspace(-kw['l_x'] / 2.0, kw['l_y'] / 2.0, kw['n_y'])
-        dx = x[1] - x[0]
-        dy = y[1] - y[0]
-        # mesh = np.array([(xi,yj) for ])
-        kw['dx'] = x[1] - x[0]
-        kw['dy'] = y[1] - y[0]
+        # time array :
+        n_t = int(kw['t_end'] / kw['dt']) + 1
+        t = np.linspace(0.0, kw['t_end'], n_t)
+
+        # For now the Crank Nicolson solver only runs with a square domain :
+        if kw['solver'] == 'crank_nicolson':
+            if kw['l_x'] != kw['l_y']:
+                raise ValueError(
+                    'Crank Nicolson method only runs with square domain : please consider using equal x and y dimensions :  lx = ly in your input file.',
+                )
+        # Mesh creation :
+        mesh = Mesh(
+            lx=kw['l_x'],
+            ly=kw['l_y'],
+            dx_fine=kw['dx_fine'],
+            dy_fine=kw['dy_fine'],
+            dx_coarse=kw['dx_coarse'],
+            dy_coarse=kw['dy_coarse'],
+            x_refine_percent=kw['x_refine_percent'],
+            y_refine_percent=kw['y_refine_percent'],
+        )
         # y0 = np.random.randint(2.0, 40.0, size=(kw['n_x'], kw['n_y'])).astype(float)
         wx = kw['p_x'] * 2.0 * np.pi / kw['l_x']
         wy = kw['p_y'] * 2.0 * np.pi / kw['l_y']
-        y_0 = kw['T_0'] * (
-            1.0
-            + np.array([
-                [
-                    np.sin(wx * xi) * np.sin(wy * yi)
-                    for xi in x
-                ] for yi in y
-            ])
-        )
+        y_0 = kw['T_0'] * (1.0 + np.sin(wx * mesh.X) * np.sin(wy * mesh.Y))
         # Computation of the diffusion coefficient field :
         if kw['D_uni']:
-            kw['D'] = kw['D_0'] * np.ones((kw['n_x'], kw['n_y']))
+            kw['D'] = kw['D_0'] * np.ones_like(mesh.X)
         if kw['D_lin']:
-            kw['D'] = kw['D_0'] * np.array(
-                [
-                    [
-                        1.0 + (xi / kw['l_x']) * (yi / kw['l_y'])
-                        for xi in x
-                    ] for yi in y
-                ],
-            )
+            kw['D'] = kw['D_0'] * (1. + (mesh.X/mesh.lx) * (mesh.Y/mesh.ly))
 
         # Boundary conditions : Neumann or Dirichlet ?
         if kw['dirichlet']:
@@ -94,12 +98,22 @@ def intiate_y(kw: dict) -> tuple:
             kw['bottom_boundary'] = kw['neumann_bottom_boundary']
             kw['top_boundary'] = kw['neumann_top_boundary']
 
-        # Debug : postt of input data :
+        # Applying the boundary conditions to y_0 :
+        y_0 = BC.apply_boundaries(mesh, y_0, **kw)
+
+        ###### Post treatment of input data #####
         input_dir = kw['save_dir'] + 'input/'
         if not os.path.exists(input_dir):
             os.makedirs(input_dir)
-        bc_condtions = BC.boundary_conds(y_0, **kw)
-        y_0 = bc_condtions[0]
+
+        plt.figure(figsize=(10, 10))
+        plt.scatter(mesh.X.ravel(), mesh.Y.ravel(), s=4)
+        plt.xlabel('X')
+        plt.ylabel('Y')
+        plt.title(
+            f'Refined Mesh Lattice (X-refine: {mesh.x_refine_percent}%, Y-refine: {mesh.y_refine_percent}%)',
+        )
+        plt.savefig(input_dir + 'mesh_2D_diffusion.png')
 
         # plotting y_0 :
         save_name = 'T_field_ini'
@@ -108,20 +122,18 @@ def intiate_y(kw: dict) -> tuple:
         labely = 'Y (m)'
         labelbar = 'Temperature ' + r'$(\degree C)$'
         postt.postt_2Dmap(
-            x,
-            y,
+            mesh,
             y_0,
             title,
-            save_name,
-            input_dir,
             labelx,
             labely,
             labelbar,
-            **kw,
+            save_dir=input_dir,
+            save_name=save_name,
         )
 
         # plotting y_0 gradient :
-        grads_ini = second.gradient(y_0, [dx, dy], edge_order=1)
+        grads_ini = diffops.gradient_mesh(mesh, y_0)
         # plotting y_0 x-gradient :
         save_name = 'dTdx_ini'
         title = r'$\frac{\partial T}{\partial x}(t=0)$'
@@ -129,16 +141,14 @@ def intiate_y(kw: dict) -> tuple:
         labely = 'Y (m)'
         labelbar = r'$\frac{\partial T}{\partial x}(t=0)$'
         postt.postt_2Dmap(
-            x,
-            y,
+            mesh,
             grads_ini[0],
             title,
-            save_name,
-            input_dir,
             labelx,
             labely,
             labelbar,
-            **kw,
+            save_dir=input_dir,
+            save_name=save_name,
         )
         # plotting y_0 y-gradient :
         save_name = 'dTdy_ini'
@@ -147,19 +157,17 @@ def intiate_y(kw: dict) -> tuple:
         labely = 'Y (m)'
         labelbar = r'$\frac{\partial T}{\partial y}(t=0)$'
         postt.postt_2Dmap(
-            x,
-            y,
+            mesh,
             grads_ini[1],
             title,
-            save_name,
-            input_dir,
             labelx,
             labely,
             labelbar,
-            **kw,
+            save_dir=input_dir,
+            save_name=save_name,
         )
         # plotting y_0 divergence :
-        div_y_0 = second.divergence(y_0, [dx, dy], edge_order=1)
+        div_y_0 = diffops.divergence_mesh(mesh, y_0)
         # plotting y_0 divergence :
         save_name = 'div_T_ini'
         title = r'$div(T)(t=0)$'
@@ -167,36 +175,32 @@ def intiate_y(kw: dict) -> tuple:
         labely = 'Y (m)'
         labelbar = r'$\frac{\partial T}{\partial x} + \frac{\partial T}{\partial y} \quad (t=0)$'
         postt.postt_2Dmap(
-            x,
-            y,
+            mesh,
             div_y_0,
             title,
-            save_name,
-            input_dir,
             labelx,
             labely,
             labelbar,
-            **kw,
+            save_dir=input_dir,
+            save_name=save_name,
         )
 
         # plotting second member F initial value :
-        sec_0 = second.F(y_0, **kw)
+        sec_0 = second.F_diffusion(y_0, **kw)
         save_name = 'F_ini'
         title = 'F at t = 0 s \n'
         labelx = 'X (m)'
         labely = 'Y (m)'
         labelbar = 'F'
         postt.postt_2Dmap(
-            x,
-            y,
+            mesh,
             sec_0,
             title,
-            save_name,
-            input_dir,
             labelx,
             labely,
             labelbar,
-            **kw,
+            save_dir=input_dir,
+            save_name=save_name,
         )
 
         # plotting diffusion D(x,y) :
@@ -206,24 +210,19 @@ def intiate_y(kw: dict) -> tuple:
         labely = 'Y (m)'
         labelbar = 'D'
         postt.postt_2Dmap(
-            x,
-            y,
+            mesh,
             kw['D'],
             title,
-            save_name,
-            input_dir,
             labelx,
             labely,
             labelbar,
-            **kw,
+            save_dir=input_dir,
+            save_name=save_name,
         )
 
         # plotting boundary conditions :
-        contour_test = bc_condtions[1]
-        bc_test = bc_condtions[2]
-        plt.scatter(contour_test, bc_test, s=4)
-        plt.title('Concatenated interpolated array')
-        plt.savefig(input_dir + 'BC' + '.png')
-        plt.close('all')
+        save_name = 'BCs'
+        postt.plot_boundary_conditions(mesh, input_dir, save_name, **kw)
+        print(f'Visualize your initial configuration in {input_dir}!')
 
-    return y_0, kw
+    return y_0, t, kw
