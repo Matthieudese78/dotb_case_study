@@ -3,3 +3,7 @@ Centralized implementation of time marching methods dedicated to equations of ty
 
 # Installation :
 Pull the git repo :
+
+```
+pip install .
+```
