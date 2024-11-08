@@ -3,6 +3,9 @@ from __future__ import annotations
 
 import numpy as np
 
+import dotb.differential_operators as diffops
+from dotb.refined_mesh_class import Mesh
+
 
 def F(y, **kw):
     if kw['case'] == 'ballistic':
@@ -48,44 +51,20 @@ def rabbit(N: np.ndarray, k: float, b: float):
     return k*N*(1. - (N/b))
 
 
-def gradient(data, discr, edge_order=1):
+def F_diffusion(mesh: Mesh, data: np.ndarray, D: np.ndarray) -> np.ndarray:
+    """"
+    Computes the scalar laplacian of D * y where D is the diffusion field.
     """
-    Gradient for 2D fields
 
-    data(x,y,t) (array): 2D field
-    edge_order = (fixed to 1) :
-        gradient estimation at the boundaries :
-            - x-component -> left & bottom boundaries
-                          -> forward difference
-            - y-component -> right & top boundaries
-                          -> backward difference
-
-    Returns : np.array([partial d field / partial x ,
-                        partial d field / partial y ])
-    """
-    grads = []
+    grads = diffops.gradient_mesh(mesh, data)
+    grads[0] = D * grads[0]
+    grads[1] = D * grads[1]
+    grad2 = []
     [
-        grads.append(
-            np.gradient(
-                data, discr[i], axis=i, edge_order=edge_order,
-            ),
-        )
-        for i, si in enumerate(np.shape(data))
+        grad2.append(diffops.gradient_mesh(mesh, gradi)[i])
+        for i, gradi in enumerate(grads)
     ]
-    return np.array(grads)
-
-
-def divergence(data, discr, edge_order=1):
-    """
-    Divergence for 2D fields
-
-    data(x,y,t) (array): 2D field
-
-    Returns : np.array([(partial d field / partial x) +
-                        (partial d field / partial y) ])
-    """
-    grads = gradient(data, discr, edge_order)
-    return np.sum(grads, axis=0)
+    return np.sum(np.array(grad2), axis=0)
 
 
 def diffusion(data, edge_order=1, **kw):
