@@ -1,25 +1,31 @@
-# Name of the study case = keyword for the second member "F" computation, choose between :
-# - ballistic
-# - rabbit
-# - diffusion
+# Name of the study case = keyword for the second member "F" :
 case: "ballistic"
-# Solver :
-solver: "euler_explicit"
+# Solver : choose between :
+# solver: "euler_explicit"
 # solver: "adams_bashforth"
+solver: "crank_nicolson"
+
 # Saving results directory :
-save_dir: "/home/matthieu/Documents/dotblocks/dotb_case_study/results/ballistic/"
+save_dir: "./home/matthieu/Documents/dotblocks/dotb_case_study/results/ballistic/"
+
 # Calculus duration :
 t_end: 10.
 # Time step number :
-dt: 0.1
+dt: 1.e-4
 # save every ... :
-n_save: 2
+n_save: 100
 # Initial x-coordinate :
 x_0: 0.
 # Initial y-coordinate :
 y_0: 0.
 # Initial velocity magnitude :
 v_0: 20.
+# If implicit time integration scheme :
+#   -> Newton-Raphson characteristics
+#   Max number of loop iterations :
+n_iter_max: 60
+# Tol :
+tol: 1.e-12
 # Initial angle / (Ox) :
 theta_0: 45.
 # Gravitational constant (m.s^-2) :

@@ -14,7 +14,10 @@ class Ballistic:
     def __init__(self, **kw):
         self.g = kw['g']
         # Compute drag coeff.
-        self.mu = 0.5*kw['rho']*kw['c']*kw['A']
+        self.mu = 0.5 * kw['rho'] * kw['c'] * kw['A']
+        self.rho = kw['rho']
+        self.c = kw['c']
+        self.A = kw['A']
 
     # Right hand side of the ballistic equation :
     def dydt(self, y, **kw):  # unused kw args for consistency
@@ -22,25 +25,89 @@ class Ballistic:
         dydt = y[3]
         # Computes velocity magnitude
         magv = np.sqrt(dxdt**2 + dydt**2)
-        return np.array([dxdt, dydt, -self.mu*dxdt*magv, - self.g - self.mu*dydt*magv])
+        return np.array(
+            [dxdt, dydt, -self.mu * dxdt * magv, -self.g - self.mu * dydt * magv],
+        )
+
     # Neutral boundary condition function :
 
     def bcond(self, y):
         return y
+
+    def newton_raphson(self, y, y1, f, dt, niter_max, tol):
+        for iter in range(niter_max):
+            # y1 riht hand side :
+            f1 = F_ballistic(y, self.rho, self.c, self.A, self.g)
+            # residual computation :
+            residual = y1 - y - (dt / 2.0) * (f + f1)
+            residual_norm = np.linalg.norm(residual)
+            # Convergence ?
+            if residual_norm < tol:
+                print(f'convergence after niter = {iter}')
+                break
+            # Tangent matrix computation :
+            # Crank-Nicolson : I - dt/2 * jacobian(F)
+            jacobian = (
+                identity(len(y1)) - (dt / 2.0) *
+                jacobian_ballistic(y1, self.mu)
+            )
+            # y-increment computation :
+            delta_y = solve(jacobian, -residual, check_finite=True)
+            y1 += delta_y
+            # yielding a new residual value :
+            residual = y1 - y - (dt / 2.0) * (f + f1)
+            residual_norm = np.linalg.norm(residual)
+            # Convergence ?
+            if residual_norm < tol:
+                print(f'convergence after niter = {iter}')
+                break
+            if iter == (niter_max - 1):
+                print(f'divergence, ||res|| = {residual_norm}')
 
 
 class Rabbit:
     def __init__(self, **kw):
         self.k = kw['k']
         self.b = kw['b']
+
     # Right hand side of the rabbit equation :
 
     def dydt(self, y, **kw):  # unused kw args for consistency
-        return self.k*y*(1. - (y/self.b))
+        return self.k * y * (1.0 - (y / self.b))
+
     # Neutral boundary condition function :
 
     def bcond(self, y):
         return y
+
+    def newton_raphson(self, y, y1, f, dt, niter_max, tol):
+        for iter in range(niter_max):
+            # y1 riht hand side :
+            f1 = F_rabbit(y, self.k, self.b)
+            # residual computation :
+            residual = y1 - y - (dt / 2.0) * (f + f1)
+            residual_norm = np.abs(residual)
+            # Convergence ?
+            if residual_norm < tol:
+                print(f'convergence after niter = {iter}')
+                break
+            # Tangent matrix computation :
+            # Crank-Nicolson : I - dt/2 * jacobian(F)
+            jacobian = (
+                1. - (dt / 2.0) * jacobian_rabbit(y1, self.k, self.b)
+            )
+            # y-increment computation :
+            delta_y = -residual/jacobian
+            y1 += delta_y
+            # yielding a new residual value :
+            residual = y1 - y - (dt / 2.0) * (f + f1)
+            residual_norm = np.linalg.norm(residual)
+            # Convergence ?
+            if residual_norm < tol:
+                print(f'convergence after niter = {iter}')
+                break
+            if iter == (niter_max - 1):
+                print(f'divergence, ||res|| = {residual_norm}')
 
 
 class Diffusion:
@@ -48,9 +115,15 @@ class Diffusion:
         self.D = kw['D']
         self.mesh = kw['mesh']
         self.dict_bc = {
-            k: kw.get(k) for k in [
-                'dirichlet', 'neumann', 'left_boundary',
-                'bottom_boundary', 'right_boundary', 'top_boundary', 'interpolation_coeff',
+            k: kw.get(k)
+            for k in [
+                'dirichlet',
+                'neumann',
+                'left_boundary',
+                'bottom_boundary',
+                'right_boundary',
+                'top_boundary',
+                'interpolation_coeff',
             ]
         }
         # Warning : quick fix : apply_boundaries does not appreciate having mesh as positional argument and in the dict with the same name!
@@ -71,6 +144,7 @@ class Diffusion:
             for i, gradi in enumerate(grads)
         ]
         return np.sum(np.array(grad2), axis=0)
+
     # Method to apply the boundary conds :
 
     def bcond(self, y):
@@ -86,7 +160,7 @@ class Diffusion:
             y1 = y1.flatten()
             f1 = f1.flatten()
             # residual computation :
-            residual = y1 - y.flatten() - (dt/2.) * (f.flatten() + f1)
+            residual = y1 - y.flatten() - (dt / 2.0) * (f.flatten() + f1)
             residual_norm = np.linalg.norm(residual)
             # Convergence ?
             if residual_norm < tol:
@@ -96,8 +170,8 @@ class Diffusion:
             # Tangent matrix computation :
             # Crank-Nicolson : I - dt/2 * nabla^2
             jacobian = (
-                identity(self.mesh.nx*self.mesh.ny) - (dt/2.) *
-                diffops.scalar_laplacian_tensor(self.mesh)
+                identity(self.mesh.nx * self.mesh.ny)
+                - (dt / 2.0) * diffops.scalar_laplacian_tensor(self.mesh)
             ).toarray()
             # y-increment computation :
             delta_y = solve(jacobian, -residual, check_finite=True)
@@ -118,14 +192,14 @@ class Diffusion:
 
 def F(y, **kw):
     if kw['case'] == 'ballistic':
-        return ballistic(y, kw['rho'], kw['c'], kw['A'], kw['g'])
+        return F_ballistic(y, kw['rho'], kw['c'], kw['A'], kw['g'])
     if kw['case'] == 'rabbit':
-        return rabbit(y, kw['k'], kw['b'])
+        return F_rabbit(y, kw['k'], kw['b'])
     if kw['case'] == 'diffusion_2D':
-        return diffusion(y, edge_order=1, **kw)
+        return F_diffusion(y, edge_order=1, **kw)
 
 
-def ballistic(y, rho: float, c: float, A: float, g: float):
+def F_ballistic(y, rho: float, c: float, A: float, g: float):
     """
     Ballistic function for F(x,y,dydx')
 
@@ -140,13 +214,13 @@ def ballistic(y, rho: float, c: float, A: float, g: float):
     dxdt = y[2]
     dydt = y[3]
     # Computes the mu coeff.
-    mu = 0.5*rho*c*A
+    mu = 0.5 * rho * c * A
     # Computes velocity magnitude
     magv = np.sqrt(dxdt**2 + dydt**2)
-    return np.array([dxdt, dydt, -mu*dxdt*magv, - g - mu*dydt*magv])
+    return np.array([dxdt, dydt, -mu * dxdt * magv, -g - mu * dydt * magv])
 
 
-def rabbit(N: np.ndarray, k: float, b: float):
+def F_rabbit(N: np.ndarray, k: float, b: float):
     """
     Rabbit puplation dynamics function for F(x,y,dydx')
 
@@ -157,12 +231,22 @@ def rabbit(N: np.ndarray, k: float, b: float):
     Returns:
     2nd member = 1D-array : F(N,k,b)
     """
-    return k*N*(1. - (N/b))
+    return k * N * (1.0 - (N / b))
 
 
 def F_diffusion(mesh: Mesh, data: np.ndarray, D: np.ndarray) -> np.ndarray:
-    """"
+    """ "
     Computes the scalar laplacian of D * y where D is the diffusion field.
+
+    Parameters :
+
+    data(x,y,t) (array): Current temperature field
+    D(x,y,t) (array): diffusion coefficient
+
+    Returns :
+
+    F(x,y,t) : div[ D(x,y) * grad(T(x,y,t)) ]
+    2nd member of the diffusion equation
     """
     grads = diffops.gradient_mesh(mesh, data)
     grads[0] = D * grads[0]
@@ -175,52 +259,32 @@ def F_diffusion(mesh: Mesh, data: np.ndarray, D: np.ndarray) -> np.ndarray:
     return np.sum(np.array(grad2), axis=0)
 
 
-def diffusion(data, edge_order=1, **kw):
-    # print(f'second.diffusion : np.shape(data) = {np.shape(data)}')
-    # print(f'second.diffusion : len(np.shape(data)) = {len(np.shape(data))}')
-    """
-    Difffusion for F(x,y,dydx')
+def jacobian_rabbit(y, k, b):
+    return 1. - k - (2.*y/b)
 
-    data(x,y,t) (array): Current temperature field
-    D(x,y,t) (array): diffusion coefficient
-    edge_order = 1
 
-    Returns : F(x,y,t) : div[ D(x,y) * grad(T(x,y,t)) ]
-    2nd member of the diffusion equation
-    """
-    # Spatial discretization :
-    x = np.linspace(-kw['l_x']/2., kw['l_x']/2., kw['n_x'])
-    y = np.linspace(-kw['l_x']/2., kw['l_y']/2., kw['n_y'])
-    dx = x[1] - x[0]
-    dy = y[1] - y[0]
-    discr = [dx, dy]
-
-    # Gradient of the temperature field :
-    grads = gradient(data, discr, edge_order)
-
-    # Multiplying the temperature gradient by the conduction coeff. :
-
-    # 1kw['D'] :
-    if len(np.shape(data)) == 1:
-        grads = kw['D'] * grads
-        # order two derivative = (in 1kw['D']) scalar laplacian
-        sl = np.gradient(grads, dx)
-
-    # 2kw['D'] :
-    if len(np.shape(data)) == 2:
-        grads[0] = kw['D'] * grads[0]
-        grads[1] = kw['D'] * grads[1]
-        # order two derivative :
-        grad2s = []
+def jacobian_ballistic(y, mu):
+    z = y[2]
+    w = y[3]
+    return np.array(
         [
-            grad2s.append(
-                np.gradient(
-                    gradi, discr[i], axis=i, edge_order=edge_order,
-                ),
-            )
-            for i, gradi in enumerate(grads)
-        ]
-        # scalar laplacian :
-        sl = np.sum(grad2s, axis=0)
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+            [
+                0,
+                0,
+                -1.0 * mu * z**2 / (w**2 + z**2) ** 0.5 -
+                mu * (w**2 + z**2) ** 0.5,
+                -1.0 * mu * w * z / (w**2 + z**2) ** 0.5,
+            ],
+            [
+                0,
+                0,
+                -1.0 * mu * w * z / (w**2 + z**2) ** 0.5,
+                -1.0 * mu * w**2 / (w**2 + z**2) ** 0.5 -
+                mu * (w**2 + z**2) ** 0.5,
+            ],
+        ],
+    )
 
-    return sl
+# sympy output : Matrix([[0, 0, 1, 0], [0, 0, 0, 1], [0, 0, -1.0*mu*z**2/(w**2 + z**2)**0.5 - mu*(w**2 + z**2)**0.5, -1.0*mu*w*z/(w**2 + z**2)**0.5], [0, 0, -1.0*mu*w*z/(w**2 + z**2)**0.5, -1.0*mu*w**2/(w**2 + z**2)**0.5 - mu*(w**2 + z**2)**0.5]])

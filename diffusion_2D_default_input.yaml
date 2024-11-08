@@ -1,19 +1,15 @@
-# Name of the study case = keyword for the second member "F" computation, choose between :
-# - ballistic
-# - rabbit
-# - diffusion
+# Name of the study case = keyword for the second member "F" :
 case: "diffusion_2D"
 # Solver :
-# solver: "euler_explicit"
+solver: "euler_explicit"
 # solver: "adams_bashforth"
-solver: "crank_nicolson"
+# solver: "crank_nicolson"
 # Saving results directory :
 save_dir: "/home/matthieu/Documents/dotblocks/dotb_case_study/results/diffusion_2D/"
 # Calculus duration :
-t_end: 5.
+t_end: 3.
 # Time step :
 dt: 0.001
-# n_t: 5
 # save every ... : standardized --> 25 snapshots of the calculus
 n_save: none
 #
@@ -70,25 +66,25 @@ D: none
     # Dirichlet OR Neumann :
 dirichlet: True
 neumann: False
-    # Interpolation at the corners :
-    #--> (C^1 interpolation of boundary conditions
-    # at the domain corners in order to smoothen boundary conditions)
-    # Dirichlet : temperatures meet at the mean value of two adjacent edges.
-    # Example : at the lower left corner : T = (Tleft + Tbottom)/2
-    # Neumann : corners are insulated
+# Interpolation at the corners :
+#--> (C^1 interpolation of boundary conditions
+# at the domain corners in order to smoothen boundary conditions)
+# Dirichlet : temperatures meet at the mean value of two adjacent edges.
+# Example : at the lower left corner : T = (Tleft + Tbottom)/2
+# Neumann : corners are insulated
 interpolation_coeff: 0.2
 
 dirichlet_left_boundary: 10.
 dirichlet_bottom_boundary: 30.
 dirichlet_right_boundary: 20.
 dirichlet_top_boundary: 5.
-    # Neumann : imposed heat flow value (at 1st order at the boundaries)
+# Neumann : imposed heat flow value (at 1st order at the boundaries)
 neumann_left_boundary: 1000.
 neumann_bottom_boundary: 0.
 neumann_right_boundary: 1000.
 neumann_top_boundary: 0.
-    # According to the choice of Neumann OR Dirichlet
-    # boundary conditions, the following fields will be filled at runtime :
+# According to the choice of Neumann OR Dirichlet
+# boundary conditions, the following fields will be filled at runtime :
 right_boundary: none
 left_boundary: none
 bottom_boundary: none

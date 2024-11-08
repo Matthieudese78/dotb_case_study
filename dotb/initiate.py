@@ -40,10 +40,10 @@ def intiate_y(kw: dict) -> tuple:
 
     if kw['case'] == 'ballistic':
         # time array :
-        print(f"ballistic, t_end = {kw['t_end']}")
-        print(f"type = {type(kw['t_end'])}")
-        print(f"ballistic, dt = {kw['dt']}")
-        print(f"type = {type(kw['dt'])}")
+        # print(f"ballistic, t_end = {kw['t_end']}")
+        # print(f"type = {type(kw['t_end'])}")
+        # print(f"ballistic, dt = {kw['dt']}")
+        # print(f"type = {type(kw['dt'])}")
         n_t = int(kw['t_end'] / kw['dt'] + 1.)
         t = np.linspace(0.0, kw['t_end'], n_t)
         # Reading args :
@@ -114,7 +114,7 @@ def intiate_y(kw: dict) -> tuple:
                 'bottom_boundary', 'right_boundary', 'top_boundary', 'interpolation_coeff',
             ]
         }
-        print(k1)
+        # print(k1)
         # Applying the boundary conditions to y_0 :
         # y_0 = BC.apply_boundaries(mesh, y_0, **kw)
 
@@ -238,12 +238,12 @@ def intiate_y(kw: dict) -> tuple:
         )
 
         # plotting boundary conditions :
-        print(f'input_dir {input_dir}')
-        print(f'save_name {save_name}')
+        # print(f'input_dir {input_dir}')
+        # print(f'save_name {save_name}')
 
         savename = 'BCs'
         postt.plot_boundary_conditions(mesh, input_dir, savename, **k1)
 
-        # print(f'Visualize your initial configuration in {input_dir}!')
+        print(f'Check out your initial configuration in {input_dir}!')
 
     return y_0, t, kw

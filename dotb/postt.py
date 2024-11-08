@@ -74,6 +74,14 @@ def postt_ballistic_2(t: np.ndarray, sol: np.ndarray, **kw):
         plt.savefig(kw['save_dir'] + fig_names[i] + '.png')
         plt.close('all')
 
+    plt.plot(sol[:, 0], sol[:, 1])
+    plt.xlabel('x (m)')
+    plt.ylabel('y (m)')
+    plt.title(f'Trajectory \n')
+    # plt.legend()
+    plt.savefig(kw['save_dir'] + 'Trajectory' + '.png')
+    plt.close('all')
+
 
 def postt_ballistic(t, sol):
     for i, slice in enumerate(sol):
@@ -624,7 +632,7 @@ def postt_2Dmap_limits(
         mesh.Y.ravel(),
         c=data.ravel(),
         cmap='inferno',
-        s=100,
+        s=15,
     )
 
     # Set limits and aspect ratio
@@ -654,99 +662,6 @@ def postt_2Dmap_limits(
     # Save :
     f.savefig(dirsave + save_name + '.png')
     plt.close('all')
-
-# def postt_2Dmap_limits(
-#     x, y, data, title, save_name, dirsave, labelx, labely, labelbar, limitbar=[],
-# ):
-#     X, Y = np.meshgrid(x, y)
-#     f = plt.figure(figsize=(8, 6))
-#     # init subplots :def postt_2Dmap_limits(
-#     x, y, data, title, save_name, dirsave, labelx, labely, labelbar, limitbar=[],
-# ):
-#     X, Y = np.meshgrid(x, y)
-#     f = plt.figure(figsize=(8, 6))
-#     # init subplots :
-#     gs = gridspec.GridSpec(1, 2, width_ratios=[10, 0.5])
-#     # 1st subplot :
-#     plt.subplot(gs[0])
-#     # Create figure and axis
-#     ax = plt.gca()
-
-#     # Plot scatter plot with colors determined by data values
-#     ax.scatter(
-#         X.ravel(),
-#         Y.ravel(),
-#         c=data.ravel(),
-#         cmap='inferno',
-#         s=100,
-#     )
-
-#     # Set limits and aspect ratio
-#     ax.set_xlim(x[0], x[-1])
-#     ax.set_ylim(y[0], y[-1])
-#     ax.set_aspect('equal')
-
-#     ax.set_xlabel(f'{labelx}')
-#     ax.set_ylabel(f'{labely}')
-
-#     ax.set_title(title)
-
-#     # 2nd subplot :
-#     plt.subplot(gs[1])
-#     plt.ticklabel_format(useOffset=False, style='plain', axis='both')
-#     ax = f.gca()
-#     norm = mplcolors.Normalize(vmin=limitbar[0], vmax=limitbar[1])
-#     plt.colorbar(
-#         mplcm.ScalarMappable(norm=norm, cmap='inferno'),
-#         cax=ax,
-#         orientation='vertical',
-#         label=labelbar,
-#     ).formatter.set_useOffset(False)
-#     f.tight_layout(pad=0.5)
-#     # Save :
-#     f.savefig(dirsave + save_name + '.png')
-#     plt.close('all')
-#     gs = gridspec.GridSpec(1, 2, width_ratios=[10, 0.5])
-#     # 1st subplot :
-#     plt.subplot(gs[0])
-#     # Create figure and axis
-#     ax = plt.gca()
-
-#     # Plot scatter plot with colors determined by data values
-#     ax.scatter(
-#         X.ravel(),
-#         Y.ravel(),
-#         c=data.ravel(),
-#         cmap='inferno',
-#         s=100,
-#     )
-
-#     # Set limits and aspect ratio
-#     ax.set_xlim(x[0], x[-1])
-#     ax.set_ylim(y[0], y[-1])
-#     ax.set_aspect('equal')
-
-#     ax.set_xlabel(f'{labelx}')
-#     ax.set_ylabel(f'{labely}')
-
-#     ax.set_title(title)
-
-#     # 2nd subplot :
-#     plt.subplot(gs[1])
-#     plt.ticklabel_format(useOffset=False, style='plain', axis='both')
-#     ax = f.gca()
-#     norm = mplcolors.Normalize(vmin=limitbar[0], vmax=limitbar[1])
-#     plt.colorbar(
-#         mplcm.ScalarMappable(norm=norm, cmap='inferno'),
-#         cax=ax,
-#         orientation='vertical',
-#         label=labelbar,
-#     ).formatter.set_useOffset(False)
-#     f.tight_layout(pad=0.5)
-#     # Save :
-#     f.savefig(dirsave + save_name + '.png')
-#     plt.close('all')
-
 
 def create_gif_from_png_files(
     input_directory, output_directory, output_file, duration=5000,

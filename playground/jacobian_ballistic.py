@@ -5,7 +5,7 @@ from __future__ import annotations
 from sympy import Matrix
 from sympy import symbols
 
-# Define variables
+# %% Define variables
 x, y, z, w, mu, g = symbols('x y z w mu g')
 
 # Define a 4x1 vector field as a column matrix
