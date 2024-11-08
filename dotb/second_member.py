@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import numpy as np
+from scipy.linalg import solve
+from scipy.sparse import identity
 
 import dotb.differential_operators as diffops
 from dotb.boundary_conditions import apply_boundaries
@@ -73,6 +75,45 @@ class Diffusion:
 
     def bcond(self, y):
         return apply_boundaries(self.mesh, y, **self.dict_bc)
+
+    # Newton-Raphson :
+    #   remark : the BCs are not applied within the N-R loop
+    def newton_raphson(self, y, y1, f, dt, niter_max, tol):
+        for iter in range(niter_max):
+            # y1 riht hand side :
+            f1 = F_diffusion(self.mesh, y1, self.D)
+            # flattening arrays :
+            y1 = y1.flatten()
+            f1 = f1.flatten()
+            # residual computation :
+            residual = y1 - y.flatten() - (dt/2.) * (f.flatten() + f1)
+            residual_norm = np.linalg.norm(residual)
+            # Convergence ?
+            if residual_norm < tol:
+                y1 = y1.reshape(y.shape)
+                print(f'convergence after niter = {iter}')
+                break
+            # Tangent matrix computation :
+            # Crank-Nicolson : I - dt/2 * nabla^2
+            jacobian = (
+                identity(self.mesh.nx*self.mesh.ny) - (dt/2.) *
+                diffops.scalar_laplacian_tensor(self.mesh)
+            ).toarray()
+            # y-increment computation :
+            delta_y = solve(jacobian, -residual, check_finite=True)
+            y1 += delta_y
+            # yielding a new residual value :
+            residual = y1 - y.flatten() - (dt / 2.0) * (f.flatten() + f1)
+            residual_norm = np.linalg.norm(residual)
+            # Convergence ?
+            if residual_norm < tol:
+                y1 = y1.reshape(y.shape)
+                print(f'convergence after niter = {iter}')
+                break
+            if iter == (niter_max - 1):
+                print(f'divergence, ||res|| = {residual_norm}')
+            # reshaping y1 :
+            y1 = y1.reshape(y.shape)
 
 
 def F(y, **kw):
