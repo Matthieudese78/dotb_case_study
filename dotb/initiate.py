@@ -11,6 +11,7 @@ import dotb.differential_operators as diffops
 import dotb.postt as postt
 import dotb.second_member as second
 from dotb.refined_mesh_class import Mesh
+# from dotb.second_member import Diffusion
 
 # For input testing plots :
 
@@ -39,7 +40,12 @@ def intiate_y(kw: dict) -> tuple:
 
     if kw['case'] == 'ballistic':
         # time array :
-        t = np.linspace(0, kw['t_end'], kw['n_t'])
+        print(f"ballistic, t_end = {kw['t_end']}")
+        print(f"type = {type(kw['t_end'])}")
+        print(f"ballistic, dt = {kw['dt']}")
+        print(f"type = {type(kw['dt'])}")
+        n_t = int(kw['t_end'] / kw['dt'] + 1.)
+        t = np.linspace(0.0, kw['t_end'], n_t)
         # Reading args :
         x0 = kw['x_0']
         y0 = kw['y_0']
@@ -57,6 +63,8 @@ def intiate_y(kw: dict) -> tuple:
         # time array :
         n_t = int(kw['t_end'] / kw['dt']) + 1
         t = np.linspace(0.0, kw['t_end'], n_t)
+        # nsave : laisse vide dans le input.yaml
+        kw['n_save'] = int(n_t/25) + 1
 
         # For now the Crank Nicolson solver only runs with a square domain :
         if kw['solver'] == 'crank_nicolson':
@@ -75,6 +83,8 @@ def intiate_y(kw: dict) -> tuple:
             x_refine_percent=kw['x_refine_percent'],
             y_refine_percent=kw['y_refine_percent'],
         )
+        # Socked in the config dict :
+        kw['mesh'] = mesh
         # y0 = np.random.randint(2.0, 40.0, size=(kw['n_x'], kw['n_y'])).astype(float)
         wx = kw['p_x'] * 2.0 * np.pi / kw['l_x']
         wy = kw['p_y'] * 2.0 * np.pi / kw['l_y']
@@ -98,8 +108,11 @@ def intiate_y(kw: dict) -> tuple:
             kw['bottom_boundary'] = kw['neumann_bottom_boundary']
             kw['top_boundary'] = kw['neumann_top_boundary']
 
+        k1 = {k: kw.get(k) for k in ['dirichlet', 'neumann', 'left_boundary',
+                                     'bottom_boundary', 'right_boundary', 'top_boundary', 'interpolation_coeff']}
+        print(k1)
         # Applying the boundary conditions to y_0 :
-        y_0 = BC.apply_boundaries(mesh, y_0, **kw)
+        # y_0 = BC.apply_boundaries(mesh, y_0, **kw)
 
         ###### Post treatment of input data #####
         input_dir = kw['save_dir'] + 'input/'
@@ -186,7 +199,7 @@ def intiate_y(kw: dict) -> tuple:
         )
 
         # plotting second member F initial value :
-        sec_0 = second.F_diffusion(y_0, **kw)
+        sec_0 = second.F_diffusion(mesh, y_0, kw['D'])
         save_name = 'F_ini'
         title = 'F at t = 0 s \n'
         labelx = 'X (m)'
@@ -221,8 +234,12 @@ def intiate_y(kw: dict) -> tuple:
         )
 
         # plotting boundary conditions :
-        save_name = 'BCs'
-        postt.plot_boundary_conditions(mesh, input_dir, save_name, **kw)
-        print(f'Visualize your initial configuration in {input_dir}!')
+        print(f'input_dir {input_dir}')
+        print(f'save_name {save_name}')
+
+        savename = 'BCs'
+        postt.plot_boundary_conditions(mesh, input_dir, savename, **k1)
+
+        # print(f'Visualize your initial configuration in {input_dir}!')
 
     return y_0, t, kw

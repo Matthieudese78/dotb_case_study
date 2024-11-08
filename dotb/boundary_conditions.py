@@ -197,14 +197,12 @@ def apply_boundaries(mesh: Mesh, data: np.ndarray, **kw) -> np.ndarray:
         data[0, :] = data[1, :] - boundaries[0] * mesh.delta_x_minus[0, :]
         # x-gradient right = boundaries[2]
         #          BC_n = grad_x_n :
-        data[-1, :] = mesh.delta_x_plus[-1, :] * \
-            boundaries[2] + data[-2, :]
+        data[-1, :] = mesh.delta_x_plus[-1, :] * boundaries[2] + data[-2, :]
         # y-gradient bottom = boundaries[1]
         #          BC_0 = grad_y_0 :
         data[:, 0] = data[:, 1] - mesh.delta_y_minus[:, 0] * boundaries[1]
         # y-gradient top = boundaries[3]
         #          BC_n = grad_y_n :
-        data[:, -1] = mesh.delta_y_plus[:, -1] * \
-            boundaries[3] + data[:, -2]
+        data[:, -1] = mesh.delta_y_plus[:, -1] * boundaries[3] + data[:, -2]
 
     return data

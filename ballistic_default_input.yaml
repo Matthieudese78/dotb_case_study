@@ -4,16 +4,16 @@
 # - diffusion
 case: "ballistic"
 # Solver :
-# solver: "euler_explicit"
-solver: "adams_bashforth"
+solver: "euler_explicit"
+# solver: "adams_bashforth"
 # Saving results directory :
 save_dir: "/home/matthieu/Documents/dotblocks/dotb_case_study/results/ballistic/"
 # Calculus duration :
-t_end: 30.
+t_end: 10.
 # Time step number :
-n_t: 100
+dt: 0.1
 # save every ... :
-n_save: 10
+n_save: 2
 # Initial x-coordinate :
 x_0: 0.
 # Initial y-coordinate :

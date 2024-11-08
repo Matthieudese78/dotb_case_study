@@ -9,6 +9,8 @@ from typing import TypedDict
 import numpy as np
 import yaml
 
+from dotb.refined_mesh_class import Mesh
+
 
 class MyDictBallistic(TypedDict):
     case: str
@@ -58,6 +60,8 @@ class MyDictDiffusion2D(TypedDict):
 
     x_refine_percent: float
     y_refine_percent: float
+
+    mesh: Mesh
 
     T_0: float
 

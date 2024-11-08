@@ -9,6 +9,7 @@ import numpy as np
 from matplotlib import gridspec
 from PIL import Image
 
+import dotb.differential_operators as diffops
 import dotb.second_member as second
 from dotb.boundary_conditions import boundary_conditions_mesh
 from dotb.refined_mesh_class import Mesh
@@ -89,23 +90,23 @@ def postt_ballistic(t, sol):
 def postt_diffusion_2D(t, sol, **kw):
     output_dir_gifs = kw['save_dir']
     # x & y coordinates and discr :
-    x = np.linspace(-kw['l_x'] / 2.0, kw['l_x'] / 2.0, kw['n_x'])
-    y = np.linspace(-kw['l_x'] / 2.0, kw['l_y'] / 2.0, kw['n_y'])
-    dx = x[1] - x[0]
-    dy = y[1] - y[0]
+    # x = np.linspace(-kw['l_x'] / 2.0, kw['l_x'] / 2.0, kw['n_x'])
+    # y = np.linspace(-kw['l_x'] / 2.0, kw['l_y'] / 2.0, kw['n_y'])
+    # dx = x[1] - x[0]
+    # dy = y[1] - y[0]
 
     print(f"save_dir = {kw['save_dir']}")
     labelx = 'X (m)'
     labely = 'Y (m)'
 
     # gradient values :
-    grads = [second.gradient(soli, [dx, dy], edge_order=1) for soli in sol]
+    grads = [diffops.gradient_mesh(kw['mesh'], soli) for soli in sol]
     gradx = [gradi[0] for gradi in grads]
     grady = [gradi[1] for gradi in grads]
     # divergence values :
-    divs = [second.divergence(soli, [dx, dy], edge_order=1) for soli in sol]
+    divs = [diffops.divergence_mesh(kw['mesh'], soli) for soli in sol]
     # second member F values :
-    Fs = [second.F(soli, **kw) for soli in sol]
+    Fs = [second.F_diffusion(kw['mesh'], soli, kw['D']) for soli in sol]
     # matching max & min values :
     print(
         f'max T(x,y,t=0) = {sol[0][np.unravel_index(np.argmax(sol[0],axis=None), sol[0].shape)]}',
@@ -188,8 +189,7 @@ def postt_diffusion_2D(t, sol, **kw):
         save_name = f'T_{i}'
         title = f'Temperature at {t[i]:.2f} s \n'
         postt_2Dmap_limits(
-            x,
-            y,
+            kw['mesh'],
             soli,
             title,
             save_name,
@@ -198,7 +198,6 @@ def postt_diffusion_2D(t, sol, **kw):
             labely,
             labelbar,
             limitbar=[min_T, max_T],
-            **kw,
         )
     # Outputing gifs :
     input_dir = dir_T
@@ -214,8 +213,7 @@ def postt_diffusion_2D(t, sol, **kw):
         save_name = f'div_T_{i}'
         title = f'Temperature divergence at {t[i]:.2f} s \n'
         postt_2Dmap_limits(
-            x,
-            y,
+            kw['mesh'],
             soli,
             title,
             save_name,
@@ -224,7 +222,6 @@ def postt_diffusion_2D(t, sol, **kw):
             labely,
             labelbar,
             limitbar=[min_div, max_div],
-            **kw,
         )
     # Outputing gifs :
     input_dir = dir_T
@@ -240,8 +237,7 @@ def postt_diffusion_2D(t, sol, **kw):
         save_name = f'F_{i}'
         title = f'2nd member F at {t[i]:.2f} s \n'
         postt_2Dmap_limits(
-            x,
-            y,
+            kw['mesh'],
             soli,
             title,
             save_name,
@@ -250,7 +246,6 @@ def postt_diffusion_2D(t, sol, **kw):
             labely,
             labelbar,
             limitbar=[min_F, max_F],
-            **kw,
         )
     # Outputing gifs :
     input_dir = dir_T
@@ -266,8 +261,7 @@ def postt_diffusion_2D(t, sol, **kw):
         save_name = f'gradx_{i}'
         title = f'x-gradient at {t[i]:.2f} s \n'
         postt_2Dmap_limits(
-            x,
-            y,
+            kw['mesh'],
             soli,
             title,
             save_name,
@@ -276,7 +270,6 @@ def postt_diffusion_2D(t, sol, **kw):
             labely,
             labelbar,
             limitbar=[min_gradx, max_gradx],
-            **kw,
         )
     # Outputing gifs :
     input_dir = dir_T
@@ -292,8 +285,7 @@ def postt_diffusion_2D(t, sol, **kw):
         save_name = f'grady_{i}'
         title = f'y-gradient at {t[i]:.2f} s \n'
         postt_2Dmap_limits(
-            x,
-            y,
+            kw['mesh'],
             soli,
             title,
             save_name,
@@ -302,12 +294,234 @@ def postt_diffusion_2D(t, sol, **kw):
             labely,
             labelbar,
             limitbar=[min_grady, max_grady],
-            **kw,
         )
     # Outputing gifs :
     input_dir = dir_T
     output_file = 'grady.gif'
     create_gif_from_png_files(input_dir, output_dir_gifs, output_file)
+
+# def postt_diffusion_2D(t, sol, **kw):
+#     output_dir_gifs = kw['save_dir']
+#     # x & y coordinates and discr :
+#     x = np.linspace(-kw['l_x'] / 2.0, kw['l_x'] / 2.0, kw['n_x'])
+#     y = np.linspace(-kw['l_x'] / 2.0, kw['l_y'] / 2.0, kw['n_y'])
+#     dx = x[1] - x[0]
+#     dy = y[1] - y[0]
+
+#     print(f"save_dir = {kw['save_dir']}")
+#     labelx = 'X (m)'
+#     labely = 'Y (m)'
+
+#     # gradient values :
+#     grads = [second.gradient(soli, [dx, dy], edge_order=1) for soli in sol]
+#     gradx = [gradi[0] for gradi in grads]
+#     grady = [gradi[1] for gradi in grads]
+#     # divergence values :
+#     divs = [second.divergence(soli, [dx, dy], edge_order=1) for soli in sol]
+#     # second member F values :
+#     Fs = [second.F(soli, **kw) for soli in sol]
+#     # matching max & min values :
+#     print(
+#         f'max T(x,y,t=0) = {sol[0][np.unravel_index(np.argmax(sol[0],axis=None), sol[0].shape)]}',
+#     )
+#     print(
+#         f'min T(x,y,t=0) = {sol[0][np.unravel_index(np.argmin(sol[0],axis=None), sol[0].shape)]}',
+#     )
+
+#     # Minima :
+#     min_T = np.min(
+#         [
+#             vali[np.unravel_index(np.argmin(vali, axis=None), vali.shape)]
+#             for vali in sol
+#         ],
+#     )
+#     max_T = np.max(
+#         [
+#             vali[np.unravel_index(np.argmax(vali, axis=None), vali.shape)]
+#             for vali in sol
+#         ],
+#     )
+#     min_div = np.min(
+#         [
+#             vali[np.unravel_index(np.argmin(vali, axis=None), vali.shape)]
+#             for vali in divs
+#         ],
+#     )
+#     max_div = np.max(
+#         [
+#             vali[np.unravel_index(np.argmax(vali, axis=None), vali.shape)]
+#             for vali in divs
+#         ],
+#     )
+#     min_F = np.min(
+#         [
+#             vali[np.unravel_index(np.argmin(vali, axis=None), vali.shape)]
+#             for vali in Fs
+#         ],
+#     )
+#     max_F = np.max(
+#         [
+#             vali[np.unravel_index(np.argmax(vali, axis=None), vali.shape)]
+#             for vali in Fs
+#         ],
+#     )
+#     min_gradx = np.min(
+#         [
+#             vali[np.unravel_index(np.argmin(vali, axis=None), vali.shape)]
+#             for vali in gradx
+#         ],
+#     )
+#     max_gradx = np.max(
+#         [
+#             vali[np.unravel_index(np.argmax(vali, axis=None), vali.shape)]
+#             for vali in gradx
+#         ],
+#     )
+#     min_grady = np.min(
+#         [
+#             vali[np.unravel_index(np.argmin(vali, axis=None), vali.shape)]
+#             for vali in grady
+#         ],
+#     )
+#     max_grady = np.max(
+#         [
+#             vali[np.unravel_index(np.argmax(vali, axis=None), vali.shape)]
+#             for vali in grady
+#         ],
+#     )
+
+#     print(f'min Temperature reached at {min_T}')
+#     print(f'max Temperature reached at {max_T}')
+
+#     # Saving snapshots of Temperature field :
+#     dir_T = kw['save_dir'] + 'T/'
+#     labelbar = 'Temperature ' + r'$(\degree C)$'
+#     if not os.path.exists(dir_T):
+#         os.makedirs(dir_T)
+#     for i, soli in enumerate(sol):
+#         save_name = f'T_{i}'
+#         title = f'Temperature at {t[i]:.2f} s \n'
+#         postt_2Dmap_limits(
+#             x,
+#             y,
+#             soli,
+#             title,
+#             save_name,
+#             dir_T,
+#             labelx,
+#             labely,
+#             labelbar,
+#             limitbar=[min_T, max_T],
+#             **kw,
+#         )
+#     # Outputing gifs :
+#     input_dir = dir_T
+#     output_file = 'T.gif'
+#     create_gif_from_png_files(input_dir, output_dir_gifs, output_file)
+
+#     # Saving snapshots of temperature divergence :
+#     dir_T = kw['save_dir'] + 'div_T/'
+#     labelbar = r'$div(T)$'
+#     if not os.path.exists(dir_T):
+#         os.makedirs(dir_T)
+#     for i, soli in enumerate(divs):
+#         save_name = f'div_T_{i}'
+#         title = f'Temperature divergence at {t[i]:.2f} s \n'
+#         postt_2Dmap_limits(
+#             x,
+#             y,
+#             soli,
+#             title,
+#             save_name,
+#             dir_T,
+#             labelx,
+#             labely,
+#             labelbar,
+#             limitbar=[min_div, max_div],
+#             **kw,
+#         )
+#     # Outputing gifs :
+#     input_dir = dir_T
+#     output_file = 'div_T.gif'
+#     create_gif_from_png_files(input_dir, output_dir_gifs, output_file)
+
+#     # Saving snapshots of 2nd member F :
+#     dir_T = kw['save_dir'] + 'F/'
+#     labelbar = 'F'
+#     if not os.path.exists(dir_T):
+#         os.makedirs(dir_T)
+#     for i, soli in enumerate(Fs):
+#         save_name = f'F_{i}'
+#         title = f'2nd member F at {t[i]:.2f} s \n'
+#         postt_2Dmap_limits(
+#             x,
+#             y,
+#             soli,
+#             title,
+#             save_name,
+#             dir_T,
+#             labelx,
+#             labely,
+#             labelbar,
+#             limitbar=[min_F, max_F],
+#             **kw,
+#         )
+#     # Outputing gifs :
+#     input_dir = dir_T
+#     output_file = 'F.gif'
+#     create_gif_from_png_files(input_dir, output_dir_gifs, output_file)
+
+#     # Saving snapshots of x-gradient :
+#     dir_T = kw['save_dir'] + 'gradx/'
+#     labelbar = r'$\frac{\partial T}{\partial x}$'
+#     if not os.path.exists(dir_T):
+#         os.makedirs(dir_T)
+#     for i, soli in enumerate(gradx):
+#         save_name = f'gradx_{i}'
+#         title = f'x-gradient at {t[i]:.2f} s \n'
+#         postt_2Dmap_limits(
+#             x,
+#             y,
+#             soli,
+#             title,
+#             save_name,
+#             dir_T,
+#             labelx,
+#             labely,
+#             labelbar,
+#             limitbar=[min_gradx, max_gradx],
+#             **kw,
+#         )
+#     # Outputing gifs :
+#     input_dir = dir_T
+#     output_file = 'gradx.gif'
+#     create_gif_from_png_files(input_dir, output_dir_gifs, output_file)
+
+#     # Saving snapshots of y-gradient :
+#     dir_T = kw['save_dir'] + 'grady/'
+#     labelbar = r'$\frac{\partial T}{\partial y}$'
+#     if not os.path.exists(dir_T):
+#         os.makedirs(dir_T)
+#     for i, soli in enumerate(grady):
+#         save_name = f'grady_{i}'
+#         title = f'y-gradient at {t[i]:.2f} s \n'
+#         postt_2Dmap_limits(
+#             x,
+#             y,
+#             soli,
+#             title,
+#             save_name,
+#             dir_T,
+#             labelx,
+#             labely,
+#             labelbar,
+#             limitbar=[min_grady, max_grady],
+#             **kw,
+#         )
+#     # Outputing gifs :
+#     input_dir = dir_T
+#     output_file = 'grady.gif'
+#     create_gif_from_png_files(input_dir, output_dir_gifs, output_file)
 
 
 def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
@@ -360,7 +574,8 @@ def postt_2Dmap(mesh: Mesh, data, title: str, labelx: str, labely: str, labelbar
     plt.close('all')
 
 
-def plot_boundary_conditions(mesh: Mesh, save_dir: str = '', save_name: str = '', **kw):
+def plot_boundary_conditions(mesh, savedir, savename,  **kw):
+
     boundaries = boundary_conditions_mesh(mesh, **kw)
     arr_test = np.concatenate(
         (
@@ -387,15 +602,14 @@ def plot_boundary_conditions(mesh: Mesh, save_dir: str = '', save_name: str = ''
 
     plt.scatter(contour_test, arr_test, s=4)
     plt.title('Concatenated interpolated array')
-    plt.savefig(save_dir+save_name+'.png')
+    plt.savefig(savedir+savename+'.png')
     plt.close('all')
     return
 
 
 def postt_2Dmap_limits(
-    x, y, data, title, save_name, dirsave, labelx, labely, labelbar, limitbar=[],
+    mesh, data, title, save_name, dirsave, labelx, labely, labelbar, limitbar=[],
 ):
-    X, Y = np.meshgrid(x, y)
     f = plt.figure(figsize=(8, 6))
     # init subplots :
     gs = gridspec.GridSpec(1, 2, width_ratios=[10, 0.5])
@@ -406,14 +620,16 @@ def postt_2Dmap_limits(
 
     # Plot scatter plot with colors determined by data values
     ax.scatter(
-        X.ravel(),
-        Y.ravel(),
+        mesh.X.ravel(),
+        mesh.Y.ravel(),
         c=data.ravel(),
         cmap='inferno',
         s=100,
     )
 
     # Set limits and aspect ratio
+    x = mesh.X[:, 0]
+    y = mesh.Y[0, :]
     ax.set_xlim(x[0], x[-1])
     ax.set_ylim(y[0], y[-1])
     ax.set_aspect('equal')
@@ -438,6 +654,98 @@ def postt_2Dmap_limits(
     # Save :
     f.savefig(dirsave + save_name + '.png')
     plt.close('all')
+
+# def postt_2Dmap_limits(
+#     x, y, data, title, save_name, dirsave, labelx, labely, labelbar, limitbar=[],
+# ):
+#     X, Y = np.meshgrid(x, y)
+#     f = plt.figure(figsize=(8, 6))
+#     # init subplots :def postt_2Dmap_limits(
+#     x, y, data, title, save_name, dirsave, labelx, labely, labelbar, limitbar=[],
+# ):
+#     X, Y = np.meshgrid(x, y)
+#     f = plt.figure(figsize=(8, 6))
+#     # init subplots :
+#     gs = gridspec.GridSpec(1, 2, width_ratios=[10, 0.5])
+#     # 1st subplot :
+#     plt.subplot(gs[0])
+#     # Create figure and axis
+#     ax = plt.gca()
+
+#     # Plot scatter plot with colors determined by data values
+#     ax.scatter(
+#         X.ravel(),
+#         Y.ravel(),
+#         c=data.ravel(),
+#         cmap='inferno',
+#         s=100,
+#     )
+
+#     # Set limits and aspect ratio
+#     ax.set_xlim(x[0], x[-1])
+#     ax.set_ylim(y[0], y[-1])
+#     ax.set_aspect('equal')
+
+#     ax.set_xlabel(f'{labelx}')
+#     ax.set_ylabel(f'{labely}')
+
+#     ax.set_title(title)
+
+#     # 2nd subplot :
+#     plt.subplot(gs[1])
+#     plt.ticklabel_format(useOffset=False, style='plain', axis='both')
+#     ax = f.gca()
+#     norm = mplcolors.Normalize(vmin=limitbar[0], vmax=limitbar[1])
+#     plt.colorbar(
+#         mplcm.ScalarMappable(norm=norm, cmap='inferno'),
+#         cax=ax,
+#         orientation='vertical',
+#         label=labelbar,
+#     ).formatter.set_useOffset(False)
+#     f.tight_layout(pad=0.5)
+#     # Save :
+#     f.savefig(dirsave + save_name + '.png')
+#     plt.close('all')
+#     gs = gridspec.GridSpec(1, 2, width_ratios=[10, 0.5])
+#     # 1st subplot :
+#     plt.subplot(gs[0])
+#     # Create figure and axis
+#     ax = plt.gca()
+
+#     # Plot scatter plot with colors determined by data values
+#     ax.scatter(
+#         X.ravel(),
+#         Y.ravel(),
+#         c=data.ravel(),
+#         cmap='inferno',
+#         s=100,
+#     )
+
+#     # Set limits and aspect ratio
+#     ax.set_xlim(x[0], x[-1])
+#     ax.set_ylim(y[0], y[-1])
+#     ax.set_aspect('equal')
+
+#     ax.set_xlabel(f'{labelx}')
+#     ax.set_ylabel(f'{labely}')
+
+#     ax.set_title(title)
+
+#     # 2nd subplot :
+#     plt.subplot(gs[1])
+#     plt.ticklabel_format(useOffset=False, style='plain', axis='both')
+#     ax = f.gca()
+#     norm = mplcolors.Normalize(vmin=limitbar[0], vmax=limitbar[1])
+#     plt.colorbar(
+#         mplcm.ScalarMappable(norm=norm, cmap='inferno'),
+#         cax=ax,
+#         orientation='vertical',
+#         label=labelbar,
+#     ).formatter.set_useOffset(False)
+#     f.tight_layout(pad=0.5)
+#     # Save :
+#     f.savefig(dirsave + save_name + '.png')
+#     plt.close('all')
 
 
 def create_gif_from_png_files(

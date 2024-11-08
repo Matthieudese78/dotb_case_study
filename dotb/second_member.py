@@ -4,7 +4,75 @@ from __future__ import annotations
 import numpy as np
 
 import dotb.differential_operators as diffops
+from dotb.boundary_conditions import apply_boundaries
 from dotb.refined_mesh_class import Mesh
+
+
+class Ballistic:
+    def __init__(self, **kw):
+        self.g = kw['g']
+        # Compute drag coeff.
+        self.mu = 0.5*kw['rho']*kw['c']*kw['A']
+
+    # Right hand side of the ballistic equation :
+    def dydt(self, y, **kw):  # unused kw args for consistency
+        dxdt = y[2]
+        dydt = y[3]
+        # Computes velocity magnitude
+        magv = np.sqrt(dxdt**2 + dydt**2)
+        return np.array([dxdt, dydt, -self.mu*dxdt*magv, - self.g - self.mu*dydt*magv])
+    # Neutral boundary condition function :
+
+    def bcond(self, y):
+        return y
+
+
+class Rabbit:
+    def __init__(self, **kw):
+        self.k = kw['k']
+        self.b = kw['b']
+    # Right hand side of the rabbit equation :
+
+    def dydt(self, y, **kw):  # unused kw args for consistency
+        return self.k*y*(1. - (y/self.b))
+    # Neutral boundary condition function :
+
+    def bcond(self, y):
+        return y
+
+
+class Diffusion:
+    def __init__(self, **kw):
+        self.D = kw['D']
+        self.mesh = kw['mesh']
+        self.dict_bc = {
+            k: kw.get(k) for k in [
+                'dirichlet', 'neumann', 'left_boundary',
+                'bottom_boundary', 'right_boundary', 'top_boundary', 'interpolation_coeff',
+            ]
+        }
+        # Warning : quick fix : apply_boundaries does not appreciate having mesh as positional argument and in the dict with the same name!
+        # To do : create a config class
+
+    # Right hand side of the diffusion equation :
+    def dydt(self, y, **kw):
+        # k1 = {k: kw.get(k) for k in ['dirichlet','neumann','left_boundary','bottom_boundary','right_boundary','top_boundary','interpolation_coeff'] }
+        # print(k1)
+        # Applying the boundary conditions :
+        y = apply_boundaries(self.mesh, y, **self.dict_bc)
+        grads = diffops.gradient_mesh(self.mesh, y)
+        grads[0] = self.D * grads[0]
+        grads[1] = self.D * grads[1]
+        grad2 = []
+        [
+            grad2.append(diffops.gradient_mesh(self.mesh, gradi)[i])
+            for i, gradi in enumerate(grads)
+        ]
+        return np.sum(np.array(grad2), axis=0)
+    # Method to apply the boundary conds :
+
+    def bcond(self, y):
+        return apply_boundaries(self.mesh, y, **self.dict_bc)
 
 
 def F(y, **kw):
@@ -55,7 +123,6 @@ def F_diffusion(mesh: Mesh, data: np.ndarray, D: np.ndarray) -> np.ndarray:
     """"
     Computes the scalar laplacian of D * y where D is the diffusion field.
     """
-
     grads = diffops.gradient_mesh(mesh, data)
     grads[0] = D * grads[0]
     grads[1] = D * grads[1]

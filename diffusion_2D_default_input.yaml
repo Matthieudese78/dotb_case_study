@@ -5,12 +5,12 @@
 case: "diffusion_2D"
 # Solver :
 # solver: "euler_explicit"
-# solver: "adams_bashforth"
-solver: "crank_nicolson"
+solver: "adams_bashforth"
+# solver: "crank_nicolson"
 # Saving results directory :
 save_dir: "/home/matthieu/Documents/dotblocks/dotb_case_study/results/diffusion_2D/"
 # Calculus duration :
-t_end: 3.
+t_end: 0.5
 
 # Time step :
 dt: 0.0001
@@ -34,6 +34,8 @@ dy_coarse: 0.02
 # Refinement percentage i.e. ratio of the border lengths that are refined :
 x_refine_percent: 2.5
 y_refine_percent: 2.5
+# Empty field : mesh (filled at runtime)
+mesh: none
 # Remark : give a negative resp. a > 100. value to get a uniform mesh
 #          with mesh size dx_coarse resp. dx_fine.
 
@@ -76,9 +78,9 @@ dirichlet_bottom_boundary: 4.
 dirichlet_right_boundary: 10.
 dirichlet_top_boundary: 14.
     # Neumann : imposed heat flow value (at 1st order at the boundaries)
-neumann_left_boundary: -1.
+neumann_left_boundary: 1000.
 neumann_bottom_boundary: 0.
-neumann_right_boundary: -1.
+neumann_right_boundary: 1000.
 neumann_top_boundary: 0.
     # According to the choice of Neumann OR Dirichlet
     # boundary conditions, the following fields will be filled at runtime :

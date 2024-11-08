@@ -4,7 +4,8 @@
 # - diffusion
 case: "rabbit"
 # Solver :
-solver: "euler_explicit"
+# solver: "euler_explicit"
+solver: "adams_bashforth"
 # Saving results directory :
 save_dir: "/home/matthieu/Documents/dotblocks/dotb_case_study/results/rabbit/"
 # Calculus duration in years :
