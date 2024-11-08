@@ -10,33 +10,39 @@ solver: "crank_nicolson"
 # Saving results directory :
 save_dir: "/home/matthieu/Documents/dotblocks/dotb_case_study/results/diffusion_2D/"
 # Calculus duration :
-t_end: 10.
-# t_end: 0.005
-# Time step number :
-n_t: 10000
+t_end: 3.
+
+# Time step :
+dt: 0.0001
 # n_t: 5
-# save every ... :
-n_save: 400
-# n_save: 40
-# n_save: 1
+# save every ... : standardized --> 25 snapshots of the calculus
+n_save: none
 # x axis domain width :
 l_x: 1.
 # y axis domain width :
 l_y: 1.
-# x axis discretization :
-n_x: 10
-# y axis discretization :
-n_y: 10
-# EMPTY : x & y increments
-# (computed at runtime based on the input data)
-dx: none
-dy: none
+# x axis small discretization at the domain border :
+# (size of the smallest element)
+dx_fine: 0.005
+# y axis small discretization at the domain border :
+dy_fine: 0.005
+# x axis large discretization in the domain center :
+# (size of the largest element)
+dx_coarse: 0.02
+# y axis large discretization in the domain center :
+dy_coarse: 0.02
+# Refinement percentage i.e. ratio of the border lengths that are refined :
+x_refine_percent: 2.5
+y_refine_percent: 2.5
+# Remark : give a negative resp. a > 100. value to get a uniform mesh
+#          with mesh size dx_coarse resp. dx_fine.
+
 # Temperature "mean" value :
 T_0: 20.
 
 # Temperature initial partition :
 # Product of sinuses function of x & y variables :
-# (Next step : give Fourrier coeffs as input)
+# (Next step : give Fourrier coeffs as input for more complex fields)
 # Remark : p_x = p_y = 0. gives a uniform
 #          temperature partition = T_0
     # sinus number of periods along the x-axis :
@@ -50,30 +56,32 @@ D_uni: False
     # Product of linear functions of x and y :
 D_lin: True
     # D(x,y) : empty diffusion coeff field
-    # (filled in initiate_y)
+    # (filled at runtime by initiate_y)
 D: none
 
-# Boundary conditions :
+#### Boundary conditions :
     # Dirichlet OR Neumann :
 dirichlet: False
 neumann: True
     # Interpolation at the corners :
     #--> (C^1 interpolation of boundary conditions
     # at the domain corners in order to smoothen boundary conditions)
-interpolation_coeff: 0.
-    # Dirichlet : imposed temperature value
-dirichlet_right_boundary: 10.
+    # Dirichlet : temperatures meet at the mean value of two adjacent edges.
+    # Example : at the lower left corner : T = (Tleft + Tbottom)/2
+    # Neumann : corners are insulated
+interpolation_coeff: 0.2
+
 dirichlet_left_boundary: 10.
 dirichlet_bottom_boundary: 4.
+dirichlet_right_boundary: 10.
 dirichlet_top_boundary: 14.
-    # Neumann : imposed heat flow value (at 1st order)
-neumann_right_boundary: -100.
-neumann_left_boundary: 100.
+    # Neumann : imposed heat flow value (at 1st order at the boundaries)
+neumann_left_boundary: -1.
 neumann_bottom_boundary: 0.
+neumann_right_boundary: -1.
 neumann_top_boundary: 0.
-    # EMPTY :
-    # according to the choice of Neumann OR Dirichlet
-    # boundary conditions, the following fields will be overwritten with dirichlet_... or neumann_... BC
+    # According to the choice of Neumann OR Dirichlet
+    # boundary conditions, the following fields will be filled at runtime :
 right_boundary: none
 left_boundary: none
 bottom_boundary: none
