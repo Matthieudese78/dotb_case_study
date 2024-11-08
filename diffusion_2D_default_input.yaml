@@ -5,18 +5,18 @@
 case: "diffusion_2D"
 # Solver :
 # solver: "euler_explicit"
-solver: "adams_bashforth"
-# solver: "crank_nicolson"
+# solver: "adams_bashforth"
+solver: "crank_nicolson"
 # Saving results directory :
 save_dir: "/home/matthieu/Documents/dotblocks/dotb_case_study/results/diffusion_2D/"
 # Calculus duration :
-t_end: 0.5
-
+t_end: 5.
 # Time step :
-dt: 0.0001
+dt: 0.001
 # n_t: 5
 # save every ... : standardized --> 25 snapshots of the calculus
 n_save: none
+#
 # x axis domain width :
 l_x: 1.
 # y axis domain width :
@@ -41,7 +41,12 @@ mesh: none
 
 # Temperature "mean" value :
 T_0: 20.
-
+# If implicit time integration scheme :
+#   -> Newton-Raphson characteristics
+#   Max number of loop iterations :
+n_iter_max: 60
+# Tol = 1% of T_0 :
+tol: 0.2
 # Temperature initial partition :
 # Product of sinuses function of x & y variables :
 # (Next step : give Fourrier coeffs as input for more complex fields)
@@ -63,8 +68,8 @@ D: none
 
 #### Boundary conditions :
     # Dirichlet OR Neumann :
-dirichlet: False
-neumann: True
+dirichlet: True
+neumann: False
     # Interpolation at the corners :
     #--> (C^1 interpolation of boundary conditions
     # at the domain corners in order to smoothen boundary conditions)
@@ -74,9 +79,9 @@ neumann: True
 interpolation_coeff: 0.2
 
 dirichlet_left_boundary: 10.
-dirichlet_bottom_boundary: 4.
-dirichlet_right_boundary: 10.
-dirichlet_top_boundary: 14.
+dirichlet_bottom_boundary: 30.
+dirichlet_right_boundary: 20.
+dirichlet_top_boundary: 5.
     # Neumann : imposed heat flow value (at 1st order at the boundaries)
 neumann_left_boundary: 1000.
 neumann_bottom_boundary: 0.
