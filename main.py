@@ -12,9 +12,6 @@ import dotb.input_yaml as input
 import dotb.postt as postt
 from dotb.build_model import create_solver
 
-# %%
-# return rhs_map[case_name](method=solver_instance, **kwargs)
-
 # %% main function definition :
 
 
