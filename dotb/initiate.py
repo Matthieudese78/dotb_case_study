@@ -64,7 +64,7 @@ def intiate_y(kw: dict) -> tuple:
         n_t = int(kw['t_end'] / kw['dt']) + 1
         t = np.linspace(0.0, kw['t_end'], n_t)
         # nsave : laisse vide dans le input.yaml
-        kw['n_save'] = int(n_t/25) + 1
+        kw['n_save'] = int(n_t / 25) + 1
 
         # For now the Crank Nicolson solver only runs with a square domain :
         if kw['solver'] == 'crank_nicolson':
