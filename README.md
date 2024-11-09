@@ -64,19 +64,37 @@ Only on square 2D domains (n_x = n_y elements), next developments will concern t
 
 
 # Architecture :
-Three classes of solvers and three classes in the module solver.py.
+Three classes of solvers (module solver.py)
 - EulerExplicit
 - AdamsBashforth
 - CrankNicolson
 
-They take one of the three following equation right hand side classes as argument :
+They take one of the three following equation right hand side classes as argument (module second_member.py):
 
 - Ballistic
 - Rabbit
 - Diffusion
 
-For larger solver or case study catalogues it could be considered to create parent classes Solver and
+They are assembled in the build_model.py module in the function create_model. The mapping Solver - Study Case happens through a dictionary defined in the same module.
 
+## Add a new solver / study case :
+This way, adding a new study case consists in two steps :
+
+- crate a class in second_member.py that contains three methods :
+  - the right hand side of the equation F
+  - the newton raphson for the Crank Nicolson (form of the residual derivative etc..)
+  - the boundary conditions function (identity if none)
+- Add the class name in the solver-to-case mapping dictionary in build_model.py
+
+Conversely, adding a new solver consists in two steps :
+- Code the general structure of the solver by adding a class in the solver.py module,
+- Add the class name in the solver-to-case mapping dictionary in build_model.py
+
+
+For larger solver or case study catalogues, it could be considered to create parent classes Solver and CaseStudy to fix and control the structure of the children classes.
+
+# Tests
+To do...
 # Documentation
 To do...
 
