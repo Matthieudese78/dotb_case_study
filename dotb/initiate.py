@@ -66,12 +66,12 @@ def intiate_y(kw: dict) -> tuple:
         # nsave : laisse vide dans le input.yaml
         kw['n_save'] = int(n_t / 25) + 1
 
-        # For now the Crank Nicolson solver only runs with a square domain :
-        if kw['solver'] == 'crank_nicolson':
-            if kw['l_x'] != kw['l_y']:
-                raise ValueError(
-                    'Crank Nicolson method only runs with square domain : please consider using equal x and y dimensions :  lx = ly in your input file.',
-                )
+        # OLD : For now the Crank Nicolson solver only runs with a square domain :
+        # if kw['solver'] == 'crank_nicolson':
+        #     if kw['n_x'] != kw['n_y']:
+        #         raise ValueError(
+        #             'Crank Nicolson method only runs with square domain : please consider using equal x and y dimensions :  lx = ly in your input file.',
+        #         )
         # Mesh creation :
         mesh = Mesh(
             lx=kw['l_x'],

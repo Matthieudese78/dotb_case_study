@@ -653,22 +653,9 @@ def apply_bounds(mesh: Mesh, data: np.ndarray, **kw) -> np.ndarray:
     return data
 
 # %% Set up the problem
+# Works for Crank Nicolson with D = 1.e-2 & non uniform dirichlet boundaries!!
 # # time :
-# t_end = 1.0
-# # mesh :
-# lx = 1.0
-# ly = 2.0
-# # ly = 1.
-# dx_fine = 0.01
-# dy_fine = 0.01
-# dx_coarse = 3.0 * dx_fine
-# dy_coarse = 3.0 * dy_fine
-# x_refine_percent = 20.0
-# y_refine_percent = 20.0
-
-# Works for Crank Nicolson with D = 1.e-2 !!
-# # time :
-# t_end = 1.0
+# t_end = 10.0
 # # mesh :
 # lx = 1.0
 # ly = 1.0
@@ -676,29 +663,15 @@ def apply_bounds(mesh: Mesh, data: np.ndarray, **kw) -> np.ndarray:
 # dy_fine = 0.005
 # dx_coarse = 4.0 * dx_fine
 # dy_coarse = 4.0 * dy_fine
-# x_refine_percent = 10.
-# y_refine_percent = 10.
-
-# Works for Crank Nicolson with D = 1.e-2 & uniform dirichlet boundaries = 21 degrees !!
-# # time :
-# t_end = 2.0
-# # mesh :
-# lx = 1.0
-# ly = 1.0
-# dx_fine = 0.005
-# dy_fine = 0.005
-# dx_coarse = 4.0 * dx_fine
-# dy_coarse = 4.0 * dy_fine
-# x_refine_percent = 5.
-# y_refine_percent = 5.
+# x_refine_percent = 2.5
+# y_refine_percent = 2.5
 
 
-# Works for Crank Nicolson with D = 1.e-2 & uniform dirichlet boundaries = 22 degrees !!
 # time :
 t_end = 10.0
 # mesh :
 lx = 1.0
-ly = 1.0
+ly = 2.0
 dx_fine = 0.005
 dy_fine = 0.005
 dx_coarse = 4.0 * dx_fine

@@ -43,6 +43,8 @@ python -m dotb_case_study.main input_file.yaml
 
 Three example of configuration .yaml files are given in the root repository. Each one can be run with the three solvers.
 
+Alternatively, messy scripts are available in the playground directory for non-declarative data setting.
+
 In the absence of an input file as argument, a default 2D diffusion case will be launched.
 
 # Results
@@ -51,17 +53,11 @@ Figures are saved  in the save_dir directory given in the input.yaml.
 # Features
 - A refined mesh class Mesh enables to refine the mesh locally at the borders and corners of the domain to avoid convergence difficulties.
 
-<img src="file:///home/matthieu/Documents/dotblocks/dotb_case_study/results/diffusion_2D/input/mesh_2D_diffusion.png">
+<img src="./mesh_2D_diffusion.png">
 
 - For the 2D diffusion case, it is possible to smoothly interpolate the boundary conditions at the corners. The parameter : 'interpolation_coeff' represents the percentage of the edges length on which the interpolation takes place.
 
-<img src='file:///home/matthieu/Documents/dotblocks/dotb_case_study/results/diffusion_2D/input/BCs.png'>
-
-# Implicit Crank Nicolson algorithm : limits
-Only on square 2D domains (n_x = n_y elements), next developments will concern the tangent matrix for rectangular domain
-
-
-
+<img src='./BCs.png'>
 
 # Architecture :
 Three classes of solvers (module solver.py)
