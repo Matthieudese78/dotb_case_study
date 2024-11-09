@@ -4,11 +4,11 @@
 # - diffusion
 case: "rabbit"
 # Solver :
-# solver: "euler_explicit"
+solver: "euler_explicit"
 # solver: "adams_bashforth"
-solver: "crank_nicolson"
+# solver: "crank_nicolson"
 # Saving results directory :
-save_dir: "/home/matthieu/Documents/dotblocks/dotb_case_study/results/rabbit/"
+save_dir: "./results/rabbit/"
 # Calculus duration in years :
 t_end: 1.
 # Time step number : 1 year
@@ -28,4 +28,4 @@ b: 500.
 #   Max number of loop iterations :
 n_iter_max: 60
 # Tol :
-tol: 1.e-18
+tol: 1.e-14

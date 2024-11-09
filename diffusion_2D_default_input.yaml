@@ -5,7 +5,7 @@ solver: "euler_explicit"
 # solver: "adams_bashforth"
 # solver: "crank_nicolson"
 # Saving results directory :
-save_dir: "/home/matthieu/Documents/dotblocks/dotb_case_study/results/diffusion_2D/"
+save_dir: "./results/diffusion_2D/"
 # Calculus duration :
 t_end: 3.
 # Time step :
@@ -41,7 +41,8 @@ T_0: 20.
 #   -> Newton-Raphson characteristics
 #   Max number of loop iterations :
 n_iter_max: 60
-# Tol = 1% of T_0 :
+# Convergence criterium :
+# For example : tol = 1% of T_0 :
 tol: 0.2
 # Temperature initial partition :
 # Product of sinuses function of x & y variables :

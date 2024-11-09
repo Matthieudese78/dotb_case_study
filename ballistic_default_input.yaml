@@ -1,12 +1,12 @@
 # Name of the study case = keyword for the second member "F" :
 case: "ballistic"
 # Solver : choose between :
-# solver: "euler_explicit"
+solver: "euler_explicit"
 # solver: "adams_bashforth"
-solver: "crank_nicolson"
+# solver: "crank_nicolson"
 
 # Saving results directory :
-save_dir: "./home/matthieu/Documents/dotblocks/dotb_case_study/results/ballistic/"
+save_dir: "./results/ballistic/"
 
 # Calculus duration :
 t_end: 10.

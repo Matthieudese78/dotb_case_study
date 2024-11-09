@@ -147,7 +147,7 @@ def postt_2Dmap_interior(
 
 def gradient(data, discr, edge_order=1):
     grads = []
-    [
+    return np.array([
         grads.append(
             np.gradient(
                 data,
@@ -157,8 +157,8 @@ def gradient(data, discr, edge_order=1):
             ),
         )
         for i, si in enumerate(np.shape(data))
-    ]
-    return np.array(grads)
+    ])
+    # return np.array(grads)
 
 
 # def gradient(data, discr, edge_order):
@@ -227,11 +227,11 @@ def divergence_mesh(mesh: Mesh, data: np.ndarray) -> np.ndarray:
 def gradient_square_mesh(mesh: Mesh, data: np.ndarray) -> np.ndarray:
     grads = gradient_mesh(mesh, data)
     grad_square = []
-    [
+    return np.array([
         grad_square.append(gradient_mesh(mesh, gradi)[i])
         for i, gradi in enumerate(grads)
-    ]
-    return np.array(grad_square)
+    ])
+    # return np.array(grad_square)
 
 
 def F_diffusion(mesh: Mesh, data: np.ndarray, D: np.ndarray) -> np.ndarray:
@@ -239,11 +239,13 @@ def F_diffusion(mesh: Mesh, data: np.ndarray, D: np.ndarray) -> np.ndarray:
     grads[0] = D * grads[0]
     grads[1] = D * grads[1]
     grad2 = []
-    [
-        grad2.append(gradient_mesh(mesh, gradi)[i])
-        for i, gradi in enumerate(grads)
-    ]
-    return np.sum(np.array(grad2), axis=0)
+    return np.sum(
+        np.array([
+            grad2.append(gradient_mesh(mesh, gradi)[i])
+            for i, gradi in enumerate(grads)
+        ]), axis=0,
+    )
+    # return np.sum(np.array(grad2), axis=0)
 
 
 def diffusion(x, y, mesh, data, D, discr, edge_order=1, **kw) -> np.ndarray:
@@ -303,7 +305,7 @@ def diffusion(x, y, mesh, data, D, discr, edge_order=1, **kw) -> np.ndarray:
     if len(np.shape(data)) == 1:
         grads = D * grads
         # order two derivative = (in 1D) scalar laplacian
-        sl = np.gradient(grads)
+        return np.gradient(grads)
 
     # 2D :
     if len(np.shape(data)) == 2:
@@ -311,22 +313,24 @@ def diffusion(x, y, mesh, data, D, discr, edge_order=1, **kw) -> np.ndarray:
         grads[1] = D * grads[1]
         # order two derivative :
         grad2s = []
-        [
-            grad2s.append(
-                np.gradient(
-                    gradi,
-                    discr[i],
-                    axis=i,
-                    edge_order=edge_order,
-                ),
-            )
-            for i, gradi in enumerate(grads)
-        ]
-        grad2s = np.array(grad2s)
-        # scalar laplacian :
-        sl = np.sum(grad2s, axis=0)
+        return np.sum(
+            np.array([
+                grad2s.append(
+                    np.gradient(
+                        gradi,
+                        discr[i],
+                        axis=i,
+                        edge_order=edge_order,
+                    ),
+                )
+                for i, gradi in enumerate(grads)
+            ]), axis=0,
+        )
+        # grad2s = np.array(grad2s)
+        # # scalar laplacian :
+        # sl = np.sum(grad2s, axis=0)
 
-    return sl
+    # return sl
 
 
 def scalar_laplacian_mesh(mesh: Mesh, data: np.ndarray):
@@ -668,7 +672,7 @@ def apply_bounds(mesh: Mesh, data: np.ndarray, **kw) -> np.ndarray:
 
 
 # time :
-t_end = 10.0
+t_end = 6.0
 # mesh :
 lx = 1.0
 ly = 2.0
@@ -1154,7 +1158,7 @@ scalar_laplacian_value = scalar_laplacian_tensor(mesh) @ (y0.flatten())
 postt_2Dmap(
     mesh,
     grad_x_y0_int,
-    'tensor : interior x-gradient of T(t=0) \n',
+    'tensor : x-gradient of T(t=0) \n',
     'X',
     'Y',
     'Initial Temperature x-gradient',
@@ -1165,7 +1169,7 @@ postt_2Dmap(
 postt_2Dmap(
     mesh,
     grad_y_y0_int,
-    'tensor : interior y-gradient of T(t=0) \n',
+    'tensor : y-gradient of T(t=0) \n',
     'X',
     'Y',
     'Initial Temperature y-gradient',

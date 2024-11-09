@@ -85,6 +85,16 @@ def divergence_mesh(mesh: Mesh, data: np.ndarray) -> np.ndarray:
 
 
 def gradient_x_tensor(mesh: Mesh):
+    """
+    Computes the x-gradient operator according to varying mesh size.
+    Inspired from the gradident computation formula form
+    numpy.gradient notice.
+    Works for non uniform structured meshes.
+
+    Parameters : mesh (Mesh instance)
+
+    Returns : x-gradient operator (ndarray of size nx x ny)
+    """
     hd = mesh.delta_x_plus[:, 0]
     hs = mesh.delta_x_minus[:, 0]
 
@@ -122,6 +132,16 @@ def gradient_x_tensor(mesh: Mesh):
 
 
 def gradient_y_tensor(mesh: Mesh):
+    """
+    Computes the y-gradient operator according to varying mesh size.
+    Inspired from the gradident computation formula form
+    numpy.gradient notice.
+    Works for non uniform structured meshes.
+
+    Parameters : mesh (Mesh instance)
+
+    Returns : y-gradient operator (ndarray of size nx x ny)
+    """
     hd = mesh.delta_y_plus[0, :]
     hs = mesh.delta_y_minus[0, :]
     upper_diag = (hs**2 / (hs * hd * (hd + hs)))[:-1]
@@ -159,4 +179,12 @@ def gradient_y_tensor(mesh: Mesh):
 
 
 def scalar_laplacian_tensor(mesh: Mesh):
+    """
+    Computes the scalar laplacian operator i.e. nabla**2.
+    Uses gradient_x and y_tensor functions.
+
+    Parameters : mesh (instance of Mesh)
+
+    Returns : scalar laplacian operator (ndarray of size nx x ny)
+    """
     return (gradient_x_tensor(mesh) @ gradient_x_tensor(mesh)) + (gradient_y_tensor(mesh) @ gradient_y_tensor(mesh))
