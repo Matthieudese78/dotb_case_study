@@ -43,7 +43,7 @@ def main():
     print(
         f"Solving the {config['case']} case \n using the {config['solver']} solver",
     )
-    simu = create_solver(y, t, config['case'], config['solver'], config)
+    simu = create_solver(y, t, config)
 
     # Run simulation :
     sol = simu.solve(**config)

@@ -24,7 +24,7 @@ rhs_map = {
 solver_type = solver.EulerExplicit | solver.AdamsBashforth | solver.CrankNicolson
 
 
-def create_solver(y0: np.ndarray, t: np.ndarray, case_name: str, solver_name: str, config: dict) -> solver_type:
+def create_solver(y0: np.ndarray, t: np.ndarray, config: dict):
     """
     Reads
     Creates an instance of a solver among :
@@ -37,14 +37,13 @@ def create_solver(y0: np.ndarray, t: np.ndarray, case_name: str, solver_name: st
     - Diffusion
     which is an argument of the solver.
     """
-    if case_name not in rhs_map:
+    if config['case'] not in rhs_map:
         raise ValueError(
-            f"Invalid study case '{case_name}'. Choose from {list(rhs_map.keys())}",
+            f"Invalid study case '{config['case']}'. Choose from {list(rhs_map.keys())}",
         )
-    if solver_name not in solver_map:
+    if config['solver'] not in solver_map:
         raise ValueError(
-            f"Invalid method '{solver_name}'. Choose from {list(solver_map.keys())}",
+            f"Invalid method '{config['solver']}'. Choose from {list(solver_map.keys())}",
         )
-
-    rhs_instance = rhs_map[case_name](**config)
-    return solver_map[solver_name](y0, t, rhs=rhs_instance, **config)
+    rhs_instance = rhs_map[config['case']](**config)
+    return solver_map[config['solver']](y0, t, rhs=rhs_instance, **config)

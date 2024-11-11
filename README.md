@@ -43,9 +43,10 @@ python -m dotb_case_study.main input_file.yaml
 
 Three example of configuration .yaml files are given in the root repository. Each one can be run with the three solvers.
 
-Alternatively, messy scripts are available in the playground directory for non-declarative data setting.
-
 In the absence of an input file as argument, a default 2D diffusion case will be launched.
+
+# Non-declarative usage :
+Alternatively, a demo script "demo_diffusion.py" is available in the root directory for non-declarative data setting.
 
 # Results
 Figures are saved  in the save_dir directory given in the input.yaml.
