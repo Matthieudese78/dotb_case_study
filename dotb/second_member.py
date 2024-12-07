@@ -144,6 +144,9 @@ class Diffusion:
             for i, gradi in enumerate(grads)
         ]
         return np.sum(np.array(grad2), axis=0)
+        # test
+        # sl = diffops.scalar_laplacian_tensor(self.mesh) @ (self.D.flatten() * y.flatten())
+        # return sl.reshape(y.shape)
 
     # Method to apply the boundary conds :
 

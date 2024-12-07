@@ -23,17 +23,25 @@ for i, repi in enumerate([rep_input, rep_output]):
 
 # %% Set up the problem
 # time :
+# t_end = 3.0
 t_end = 3.0
-dt = 0.001
+# dt = 0.001
+dt = 0.0005
 # mesh :
-lx = 1.0
-ly = 1.2
+lx = 1.
+ly = 1.
 dx_fine = 0.005
 dy_fine = 0.005
+# dx_fine = 0.001
+# dy_fine = 0.001
+# dx_coarse = 16.0 * dx_fine
+# dy_coarse = 16.0 * dy_fine
 dx_coarse = 4.0 * dx_fine
 dy_coarse = 4.0 * dy_fine
 x_refine_percent = 2.5
 y_refine_percent = 2.5
+# x_refine_percent = 2.
+# y_refine_percent = 2.
 
 mesh = Mesh(
     lx=lx,
@@ -61,6 +69,7 @@ config = {
     'dt': dt,
     'n_iter_max': 60,
     'tol': 0.2,
+    # 'tol': 0.02,
     # mesh definition
     'l_x': lx,
     'l_y': ly,
@@ -73,15 +82,19 @@ config = {
     # boundary conditons definition
     'neumann': neumann,
     'dirichlet': dirichlet,
+    # 'interpolation_coeff': 0.2,
     'interpolation_coeff': 0.2,
+    # Dirichlet BCs :
     'dirichlet_left_boundary': 10.0,
     'dirichlet_bottom_boundary': 30.0,
     'dirichlet_right_boundary': 20.0,
     'dirichlet_top_boundary': 5.0,
-    'neumann_left_boundary': 1.0,
+    # Neumann BCs :
+    'neumann_left_boundary': 0.,
     'neumann_bottom_boundary': 0.0,
-    'neumann_right_boundary': -1.0,
+    'neumann_right_boundary': 0.,
     'neumann_top_boundary': 0.0,
+    # Fields read at Runtime :
     'left_boundary': None,
     'bottom_boundary': None,
     'right_boundary': None,
@@ -104,8 +117,8 @@ postt.plot_boundary_conditions(mesh, rep_input, 'BCs', **config)
 
 # %% intial solution :
 T0 = 20.0
-p_x = 1.0
-p_y = 1.0
+p_x = 2.0
+p_y = 2.0
 wx = p_x * 2.0 * np.pi / lx
 wy = p_y * 2.0 * np.pi / ly
 y0 = T0 * (1.0 + np.sin(wx * mesh.X) * np.sin(wy * mesh.Y))

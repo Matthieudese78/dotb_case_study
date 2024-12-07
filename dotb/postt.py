@@ -97,11 +97,16 @@ def postt_ballistic(t, sol):
 
 def postt_diffusion_2D(t, sol, **kw):
     output_dir_gifs = kw['save_dir']
-    # x & y coordinates and discr :
-    # x = np.linspace(-kw['l_x'] / 2.0, kw['l_x'] / 2.0, kw['n_x'])
-    # y = np.linspace(-kw['l_x'] / 2.0, kw['l_y'] / 2.0, kw['n_y'])
-    # dx = x[1] - x[0]
-    # dy = y[1] - y[0]
+
+    # plotting energy evolution :
+    energies = [np.linalg.norm(soli.flatten()) for soli in sol]
+    plt.plot(t, energies)
+    plt.xlabel('t (s)')
+    plt.ylabel('Total energy')
+    plt.title(f'Energy over time \n')
+    # plt.legend()
+    plt.savefig(kw['save_dir'] + 'Energy' + '.png')
+    plt.close('all')
 
     print(f"save_dir = {kw['save_dir']}")
     labelx = 'X (m)'

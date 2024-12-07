@@ -23,6 +23,10 @@ from dotb.refined_mesh_class import Mesh
 # from scipy.sparse import diags, identity
 
 # %%
+x = np.random.randint(10, size=(3, 3))
+print(x)
+print(x.flatten())
+# %%
 repsave = '/home/matthieu/Documents/dotblocks/dotb_case_study/playground/results/diffusion_refmesh/'
 if not os.path.exists(repsave):
     os.makedirs(repsave)
@@ -200,6 +204,9 @@ def gradient_mesh(mesh: Mesh, data: np.ndarray) -> np.ndarray:
     grad_x_0 = (data[1, :] - data[0, :]) / (mesh.delta_x_minus)[0, :]
     # print(f'shape grad_x_0 = {grad_x_0.shape}')
     grad_x_n = (data[-1, :] - data[-2, :]) / (mesh.delta_x_plus)[-1, :]
+    # test :
+    # grad_x_0 = np.zeros_like(mesh.X[0,:])
+    # grad_x_n = np.zeros_like(mesh.X[-1,:])
     # print(f'shape grad_x_n = {grad_x_n.shape}')
     # print(f'len border x : {len(grad_x_n)}')
     # stacking above : lower x values
@@ -209,6 +216,9 @@ def gradient_mesh(mesh: Mesh, data: np.ndarray) -> np.ndarray:
     #
     grad_y_0 = (data[:, 1] - data[:, 0]) / (mesh.delta_y_minus)[:, 0]
     grad_y_n = (data[:, -1] - data[:, -2]) / (mesh.delta_y_plus)[:, -1]
+    # test :
+    # grad_y_0 = np.zeros_like(mesh.Y[:,0])
+    # grad_y_n = np.zeros_like(mesh.Y[:,-1])
     # print(f'right stacking : {np.hstack((M, right_column.reshape(-1,1)))}')
     # print(f"left stacking : {np.hstack((left_column.reshape(-1,1),M))}")
     # stacking left : lower y values
@@ -227,11 +237,11 @@ def divergence_mesh(mesh: Mesh, data: np.ndarray) -> np.ndarray:
 def gradient_square_mesh(mesh: Mesh, data: np.ndarray) -> np.ndarray:
     grads = gradient_mesh(mesh, data)
     grad_square = []
-    return np.array([
+    [
         grad_square.append(gradient_mesh(mesh, gradi)[i])
         for i, gradi in enumerate(grads)
-    ])
-    # return np.array(grad_square)
+    ]
+    return np.array(grad_square)
 
 
 def F_diffusion(mesh: Mesh, data: np.ndarray, D: np.ndarray) -> np.ndarray:
@@ -239,13 +249,11 @@ def F_diffusion(mesh: Mesh, data: np.ndarray, D: np.ndarray) -> np.ndarray:
     grads[0] = D * grads[0]
     grads[1] = D * grads[1]
     grad2 = []
-    return np.sum(
-        np.array([
-            grad2.append(gradient_mesh(mesh, gradi)[i])
-            for i, gradi in enumerate(grads)
-        ]), axis=0,
-    )
-    # return np.sum(np.array(grad2), axis=0)
+    [
+        grad2.append(gradient_mesh(mesh, gradi)[i])
+        for i, gradi in enumerate(grads)
+    ]
+    return np.sum(np.array(grad2), axis=0)
 
 
 def diffusion(x, y, mesh, data, D, discr, edge_order=1, **kw) -> np.ndarray:
@@ -725,8 +733,8 @@ kw_neumann = {
     'bottom_boundary': 0.0,
     'top_boundary': 0.0,
 }
-dirichlet = True
-# neumann =  True
+dirichlet = False
+neumann = True
 
 if dirichlet:
     neumann = False
@@ -1106,6 +1114,7 @@ postt_2Dmap(
     'Initial Temperature x-gradient',
     s=spoints,
 )
+# %%
 postt_2Dmap(
     mesh,
     grad_y0[1],
@@ -1115,7 +1124,7 @@ postt_2Dmap(
     'Initial Temperature y-gradient',
     s=spoints,
 )
-
+# %%
 postt_2Dmap(
     mesh,
     divergence_mesh(mesh, y0),
@@ -1125,7 +1134,7 @@ postt_2Dmap(
     'Initial Temperature divergence',
     s=spoints,
 )
-
+# %%
 postt_2Dmap(
     mesh,
     scalar_laplacian_mesh(mesh, y0),
@@ -1503,7 +1512,7 @@ if crank_nicolson:
 # %%
 repsave_snapshots = repsave + 'solution_snapshots/'
 if not os.path.exists(repsave_snapshots):
-    os.makedirs(repsave)
+    os.makedirs(repsave_snapshots)
 
 # %% for i,soli in enumerate(sol[::2]):
 for i, soli in enumerate(sol):

@@ -128,7 +128,9 @@ def gradient_x_tensor(mesh: Mesh):
     # # Construct the 2D Laplacian operator using Kronecker products
     Iy = identity(mesh.ny)
 
+    # old :
     return kron(Lx, Iy)
+    # return kron(Iy, Lx)
 
 
 def gradient_y_tensor(mesh: Mesh):
@@ -174,8 +176,9 @@ def gradient_y_tensor(mesh: Mesh):
 
     # # Construct the 2D Laplacian operator using Kronecker products
     Ix = identity(mesh.nx)
-
+    # old :
     return kron(Ix, Ly)
+    # return kron(Ly, Ix)
 
 
 def scalar_laplacian_tensor(mesh: Mesh):

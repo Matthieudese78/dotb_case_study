@@ -94,7 +94,7 @@ class CrankNicolson:
             y = self.rhs.bcond(y)
             # Matching right hand side :
             f = self.rhs.dydt(y)
-            # Initialization with euler explicit :
+            # Initial guess :
             y1 = y + self.dt * f
             # Apply possible BC to y0
             y1 = self.rhs.bcond(y1)
