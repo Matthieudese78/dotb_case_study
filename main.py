@@ -30,13 +30,13 @@ def main():
     input.check_type(config)
 
     # y-initialization :
-    print(f'Initializing problem ...')
+    print('Initializing problem ...')
     y, t, config = init.intiate_y(config)
     #       ... then re-checked :
     input.check_type(config)
 
     # Check time step value (diffusion only : CFL) to avoid divergence :
-    print(f'Checking input data types...')
+    print('Checking input data types...')
     input.check_time_step(config)
 
     # Solver creation :
